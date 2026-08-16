@@ -33,7 +33,7 @@
     return `
       <article class="archive-card" data-id="${id}" tabindex="0">
         <img class="archive-card-back" src="${shape}" width="390" height="482" alt="" aria-hidden="true" draggable="false" />
-        <img class="archive-card-bg" src="${shape}" width="390" height="482" alt="" aria-hidden="true" draggable="false" />
+        <div class="archive-card-bg" aria-hidden="true"></div>
         <div class="archive-card-fold" aria-hidden="true"></div>
         <h3 class="archive-card-title">${title}</h3>
         <p class="archive-card-duration">${duration}</p>

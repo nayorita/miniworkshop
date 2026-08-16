@@ -617,7 +617,6 @@ svg.hud-hover-white:hover,
   font-family: var(--font-mono);
   font-weight: 400;
   overflow: visible;
-  isolation: isolate;
   outline: none;
   opacity: 0;
   transform: translateY(0.6rem);
@@ -637,9 +636,12 @@ svg.hud-hover-white:hover,
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: fill;
   pointer-events: none;
   user-select: none;
+}
+
+.archive-card-back {
+  object-fit: fill;
 }
 
 .archive-card-back {
@@ -659,6 +661,15 @@ svg.hud-hover-white:hover,
 
 .archive-card-bg {
   z-index: 1;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  mask-image: url("../public/ui/closed.svg");
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-image: url("../public/ui/closed.svg");
+  -webkit-mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
 }
 
 .archive-card-fold {
