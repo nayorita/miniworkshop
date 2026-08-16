@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NAYEON — Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="layer layer-video" aria-hidden="true">
+      <video
+        id="bg-video"
+        class="bg-video bg-video-blur"
+        autoplay
+        muted
+        loop
+        playsinline
+        poster="assets/images/thumnail.png"
+      >
+        <source src="assets/video/intro.mp4" type="video/mp4" />
+      </video>
+      <div class="video-sharp-portal" id="video-sharp-portal">
+        <video
+          id="bg-video-sharp"
+          class="bg-video-sharp"
+          autoplay
+          muted
+          loop
+          playsinline
+          poster="assets/images/thumnail.png"
+        >
+          <source src="assets/video/intro.mp4" type="video/mp4" />
+        </video>
+      </div>
+      <div class="video-fallback"></div>
+    </div>
+
+    <div class="layer layer-scrim" aria-hidden="true"></div>
+
+    <div class="layer layer-camera">
+      <div class="grid-layout" aria-label="Camera viewfinder">
+        <div class="hud-band hud-band-top" aria-hidden="true"></div>
+        <div class="hud-band hud-band-bottom" aria-hidden="true"></div>
+
+        <!-- Row 1: top icons -->
+        <div class="hud-top-row r1">
+          <div class="hud-top-group">
+            <img class="hud-icon" src="assets/icons/mode-a.png" width="150" height="150" alt="" />
+            <img class="hud-icon" src="assets/icons/flash.png" width="150" height="150" alt="" />
+            <button
+              type="button"
+              class="hud-btn archive-trigger hud-hover-white"
+              data-action="archive"
+              aria-label="Open archive"
+              aria-controls="archive"
+              aria-expanded="false"
+            >
+              <img src="assets/icons/auto-wb.png" width="206" height="150" alt="" />
+            </button>
+          </div>
+
+          <div class="hud-top-center">
+            <svg
+              class="hud-icon hud-hover-white hud-lr-meter"
+              id="lr-meter"
+              viewBox="0 0 300 65"
+              width="300"
+              height="65"
+              aria-hidden="true"
+              focusable="false"
+            ></svg>
+          </div>
+
+          <div class="hud-top-group">
+            <img class="hud-icon" src="assets/icons/focus.png" width="150" height="150" alt="" />
+            <img class="hud-icon hud-hover-white" src="assets/icons/txt-jpg.png" width="150" height="150" alt="" />
+            <img class="hud-icon" src="assets/icons/battery.png" width="205" height="150" alt="" />
+          </div>
+        </div>
+
+        <!-- Row 10: bottom icons -->
+        <div class="hud-bottom-row">
+          <div class="hud-bottom-group hud-bottom-group--left">
+            <img class="hud-icon" src="assets/icons/iso.png" width="150" height="150" alt="" />
+            <span class="hud-bottom-spacer hud-bottom-spacer--w150" aria-hidden="true"></span>
+            <img class="hud-icon" src="assets/icons/aperture.png" width="206" height="150" alt="" />
+            <img class="hud-icon hud-icon-shutter" src="assets/icons/shutter.png" width="220" height="150" alt="" />
+          </div>
+
+          <div class="hud-bottom-center">
+            <img class="hud-icon" src="assets/icons/exposure.png" width="300" height="66" alt="" />
+          </div>
+
+          <div class="hud-bottom-group hud-bottom-group--right">
+            <img class="hud-icon hud-icon-rec" src="assets/icons/rec.png" width="300" height="85" alt="" />
+          </div>
+          <div class="hud-icon hud-timecode hud-hover-white" id="timecode" aria-hidden="true">
+              <img class="timecode-prefix" src="assets/icons/digits/prefix.svg" width="52" height="66" alt="" />
+              <div class="timecode-digits" id="timecode-digits">
+                <span class="timecode-group" id="timecode-hours"></span>
+                <img class="timecode-colon" src="assets/icons/digits/colon.svg" width="11" height="66" alt="" />
+                <span class="timecode-group" id="timecode-minutes"></span>
+                <img class="timecode-colon" src="assets/icons/digits/colon.svg" width="11" height="66" alt="" />
+                <span class="timecode-group" id="timecode-seconds"></span>
+              </div>
+            </div>
+        </div>
+      </div>
+
+      <!-- center focus — follows mouse -->
+      <div class="focus-tracker" id="focus-tracker" aria-hidden="true">
+        <img
+          class="focus-center"
+          src="assets/icons/focus-center.png"
+          width="177"
+          height="176"
+          alt=""
+        />
+        <span class="focus-coords" id="focus-coords">
+          <span class="coord-group" data-axis="x"></span>
+          <span class="coord-unit">X</span>
+          <span class="coord-group" data-axis="y"></span>
+          <span class="coord-unit">Y</span>
+        </span>
+      </div>
+    </div>
+
+    <aside
+      class="layer layer-archive"
+      id="archive"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="archive-title"
+      hidden
+    >
+      <div class="archive-shell">
+        <div class="archive-scroll">
+          <div class="archive-col archive-col-copy">
+            <h2 class="archive-title" id="archive-title">TRAVEL ARCHIVE</h2>
+            <p class="archive-body">
+              Records of journeys that now exist only in photographs and in my memory.<br />
+              Though those journeys may have tormented me when they were real,<br />
+              now that time has distorted them and brought them to an end,<br />
+              they remain as memories of freedom—a freedom I long to return to.<br />
+              Every day, I take out those memories and revisit them.
+            </p>
+          </div>
+          <div class="archive-col archive-col-cards">
+            <div class="archive-grid" id="archive-grid"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <script src="js/archiveItems.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>

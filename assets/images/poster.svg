@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-label="Video poster placeholder">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a8fd4"/>
+      <stop offset="40%" stop-color="#9ec8ef"/>
+      <stop offset="75%" stop-color="#dfe9f2"/>
+      <stop offset="100%" stop-color="#b7c4cf"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#sky)"/>
+  <ellipse cx="420" cy="280" rx="220" ry="90" fill="#ffffff" opacity="0.55"/>
+  <ellipse cx="980" cy="220" rx="280" ry="100" fill="#ffffff" opacity="0.4"/>
+  <ellipse cx="1500" cy="320" rx="240" ry="80" fill="#ffffff" opacity="0.5"/>
+  <path d="M0 720 L420 560 L980 620 L1920 420 L1920 1080 L0 1080 Z" fill="#5a6270" opacity="0.88"/>
+  <path d="M0 820 L520 680 L1100 740 L1920 560 L1920 1080 L0 1080 Z" fill="#2a3038" opacity="0.75"/>
+</svg>
