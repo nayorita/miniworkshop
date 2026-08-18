@@ -2,6 +2,9 @@
 :root {
   --ink: #0a0c10;
   --hud: #ffffff;
+  --hud-icon: #F8FAFF;
+  --hud-active: #FF5500;
+  --hud-icon-filter: brightness(0) saturate(100%) invert(98%) sepia(8%) saturate(749%) hue-rotate(186deg) brightness(103%) contrast(101%);
   --hud-dim: rgba(255, 255, 255, 0.55);
   --panel: rgba(10, 12, 16, 0.9);
   --panel-border: rgba(255, 255, 255, 0.22);
@@ -18,7 +21,7 @@
   --hud-top-gap: 83.79px;
   --hud-bottom-gap: 167.58px;
   --hud-icon-h: 44.55px;
-  --scrim-edge: 0.1;
+  --scrim-edge: 0.15;
 }
 
 *,
@@ -312,11 +315,82 @@ img {
   mix-blend-mode: screen;
   user-select: none;
   pointer-events: none;
+  filter: var(--hud-icon-filter);
+}
+
+.hud-icon[src$="focus.png"],
+.hud-focus-swap .focus-hover {
+  filter: none;
+}
+
+.hud-focus-swap {
+  position: relative;
+  display: block;
+  height: var(--hud-icon-h);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.hud-focus-swap .focus-hover {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  height: var(--hud-icon-h);
+  width: auto;
+  max-width: none;
+  mix-blend-mode: screen;
+  user-select: none;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  visibility: hidden;
+}
+
+.hud-focus-swap:hover .focus-default {
+  visibility: hidden;
+}
+
+.hud-focus-swap:hover .focus-hover {
+  visibility: visible;
+}
+
+.hud-btn.archive-trigger {
+  position: relative;
+  height: var(--hud-icon-h);
+}
+
+.hud-btn.archive-trigger img {
+  filter: none;
+}
+
+.hud-btn.archive-trigger .auto-wb-hover {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  height: 52.66px;
+  transform: translate(-50%, -50%);
+  visibility: hidden;
+}
+
+.hud-btn.archive-trigger:hover .auto-wb-default {
+  visibility: hidden;
+}
+
+.hud-btn.archive-trigger:hover .auto-wb-hover {
+  visibility: visible;
 }
 
 /* asset 12 — elapsed timecode */
 .hud-icon.hud-icon-rec {
   height: 19.66px;
+}
+
+.hud-timecode.hud-icon {
+  height: var(--tc-h);
+  width: auto;
+  mix-blend-mode: unset;
+  filter: none;
 }
 
 .hud-timecode {
@@ -334,7 +408,12 @@ img {
 }
 
 .hud-timecode .timecode-prefix,
+.hud-timecode .timecode-colon,
 .hud-timecode .timecode-reel img {
+  filter: none;
+}
+
+.hud-timecode .timecode-prefix {
   display: block;
   height: var(--tc-h);
   width: auto;
@@ -347,6 +426,14 @@ img {
   height: var(--tc-h);
   width: var(--tc-colon-w);
   flex-shrink: 0;
+  mix-blend-mode: unset;
+  pointer-events: none;
+}
+
+.hud-timecode .timecode-reel img {
+  display: block;
+  height: var(--tc-h);
+  width: auto;
   mix-blend-mode: unset;
   pointer-events: none;
 }
@@ -426,6 +513,10 @@ svg.hud-hover-white:hover,
   filter: brightness(0) invert(1);
 }
 
+.hud-btn.archive-trigger.hud-hover-white:hover img {
+  filter: none;
+}
+
 /* center focus — mouse tracking */
 .focus-tracker {
   position: fixed;
@@ -440,6 +531,7 @@ svg.hud-hover-white:hover,
   width: auto;
   mix-blend-mode: screen;
   user-select: none;
+  filter: var(--hud-icon-filter);
 }
 
 .focus-tracker.is-hidden {

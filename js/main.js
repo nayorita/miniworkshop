@@ -462,12 +462,15 @@
     if (!hoursRoot || !minutesRoot || !secondsRoot) return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const SRC = (n) => `assets/icons/digits/${n}.svg`;
     const SLOT_H = 19.66;
     const startTime = performance.now();
     const hourSlots = [];
     const minuteSlots = [];
     const secondSlots = [];
+
+    function digitSrc(n) {
+      return `assets/icons/digits/${n}.svg`;
+    }
 
     function createSlot(parent, initial) {
       const slot = document.createElement("span");
@@ -476,14 +479,14 @@
       reel.className = "timecode-reel";
       for (let n = 0; n <= 9; n += 1) {
         const img = document.createElement("img");
-        img.src = SRC(n);
+        img.src = digitSrc(n);
         img.width = 38;
         img.height = 66;
         img.alt = "";
         reel.appendChild(img);
       }
       const wrapImg = document.createElement("img");
-      wrapImg.src = SRC(0);
+      wrapImg.src = digitSrc(0);
       wrapImg.width = 38;
       wrapImg.height = 66;
       wrapImg.alt = "";
@@ -513,7 +516,8 @@
       }
 
       reel.addEventListener("transitionend", (event) => {
-        if (event.propertyName === "transform") normalize();
+        if (event.propertyName !== "transform") return;
+        normalize();
       });
 
       apply(true);
