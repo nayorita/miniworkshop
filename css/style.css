@@ -15,13 +15,16 @@
   --grid-cols: 18;
   --font-mono: "IBM Plex Mono", monospace;
   --font-sans: "IBM Plex Sans", sans-serif;
-  --focus-h: 112.64px;
+  --hud-scale: min(1, 1280px / 100vw);
+  --focus-h: calc(112.64px * var(--hud-scale));
   --focus-w: calc(var(--focus-h) * 177 / 176);
   --video-blur: 5px;
-  --hud-top-gap: 83.79px;
-  --hud-bottom-gap: 167.58px;
-  --hud-icon-h: 44.55px;
-  --scrim-edge: 0.15;
+  --hud-top-gap: calc(83.79px * var(--hud-scale));
+  --hud-bottom-gap: calc(167.58px * var(--hud-scale));
+  --hud-icon-h: calc(44.55px * var(--hud-scale));
+  --hud-icon-h-hover: calc(52.66px * var(--hud-scale));
+  --tc-h: calc(19.66px * var(--hud-scale));
+  --scrim-edge: 0.12;
 }
 
 *,
@@ -368,7 +371,7 @@ img {
   left: 50%;
   top: 50%;
   display: block;
-  height: 52.66px;
+  height: var(--hud-icon-h-hover);
   transform: translate(-50%, -50%);
   visibility: hidden;
 }
@@ -383,7 +386,7 @@ img {
 
 /* asset 12 — elapsed timecode */
 .hud-icon.hud-icon-rec {
-  height: 19.66px;
+  height: var(--tc-h);
 }
 
 .hud-timecode.hud-icon {
@@ -394,7 +397,6 @@ img {
 }
 
 .hud-timecode {
-  --tc-h: 19.66px;
   --tc-gap: calc(var(--tc-h) * 18 / 66);
   --tc-colon-w: calc(var(--tc-h) * 11 / 66);
   position: absolute;
@@ -452,7 +454,7 @@ img {
 
 .timecode-slot {
   height: 100%;
-  width: calc(19.66px * 38 / 66);
+  width: calc(var(--tc-h) * 38 / 66);
   overflow: hidden;
   flex-shrink: 0;
 }

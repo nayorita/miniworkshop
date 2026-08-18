@@ -137,14 +137,21 @@
   }
 
   // center focus tracker
+  function cssPx(name) {
+    const probe = document.createElement("div");
+    probe.style.cssText = `position:absolute;visibility:hidden;height:var(${name})`;
+    document.body.appendChild(probe);
+    const value = probe.getBoundingClientRect().height;
+    probe.remove();
+    return value;
+  }
+
   const focusTracker = document.getElementById("focus-tracker");
   const focusCoords = document.getElementById("focus-coords");
   const focusCenter = focusTracker?.querySelector(".focus-center");
 
-  const focusH = parseFloat(
-    getComputedStyle(document.documentElement).getPropertyValue("--focus-h")
-  );
-  const focusW = focusH * (177 / 176);
+  let focusH = cssPx("--focus-h");
+  let focusW = focusH * (177 / 176);
 
   const gridLayout = document.querySelector(".grid-layout");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -336,6 +343,8 @@
   });
 
   window.addEventListener("resize", () => {
+    focusH = cssPx("--focus-h");
+    focusW = focusH * (177 / 176);
     const x = parseFloat(focusTracker?.style.left || String(window.innerWidth / 2));
     const y = parseFloat(focusTracker?.style.top || String(window.innerHeight / 2));
     if (isCenterZone(y)) {
@@ -462,7 +471,7 @@
     if (!hoursRoot || !minutesRoot || !secondsRoot) return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const SLOT_H = 19.66;
+    const SLOT_H = cssPx("--tc-h");
     const startTime = performance.now();
     const hourSlots = [];
     const minuteSlots = [];
