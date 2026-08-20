@@ -21,8 +21,8 @@
   --video-blur: 5px;
   --hud-top-gap: calc(83.79px * var(--hud-scale));
   --hud-bottom-gap: calc(167.58px * var(--hud-scale));
-  --hud-icon-h: calc(44.55px * var(--hud-scale));
-  --hud-icon-h-hover: calc(52.66px * var(--hud-scale));
+  --hud-icon-h: calc(44.55px * var(--hud-scale) * 0.95);
+  --hud-icon-h-hover: calc(52.66px * var(--hud-scale) * 0.95);
   --tc-h: calc(19.66px * var(--hud-scale));
   --tc-w: calc(var(--tc-h) * 300 / 46);
   /* hover source: grey digits 282×44 inside 300×62; map digits to default 300×46 */
