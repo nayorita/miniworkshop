@@ -471,7 +471,6 @@
     if (!hoursRoot || !minutesRoot || !secondsRoot) return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const SLOT_H = cssPx("--tc-h");
     const startTime = performance.now();
     const hourSlots = [];
     const minuteSlots = [];
@@ -522,7 +521,7 @@
       let digit = initial;
 
       function apply(immediate) {
-        const y = `${-index * SLOT_H}px`;
+        const y = `calc(${-index} * var(--tc-h))`;
         if (immediate || reduceMotion) {
           reel.style.transition = "none";
           reel.style.transform = `translateY(${y})`;

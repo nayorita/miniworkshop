@@ -15,7 +15,7 @@
   --grid-cols: 18;
   --font-mono: "IBM Plex Mono", monospace;
   --font-sans: "IBM Plex Sans", sans-serif;
-  --hud-scale: min(1, 1280px / 100vw);
+  --hud-scale: calc(min(1, 1280px / 100vw) * 1.21);
   --focus-h: calc(112.64px * var(--hud-scale));
   --focus-w: calc(var(--focus-h) * 177 / 176);
   --video-blur: 5px;
@@ -477,7 +477,8 @@ img {
 .hud-timecode .timecode-prefix {
   display: block;
   height: var(--tc-h);
-  width: auto;
+  width: calc(var(--tc-h) * 51.5 / 66);
+  flex-shrink: 0;
   pointer-events: none;
 }
 
@@ -492,7 +493,8 @@ img {
 .hud-timecode .timecode-reel img {
   display: block;
   height: var(--tc-h);
-  width: auto;
+  width: calc(var(--tc-h) * 38 / 66);
+  flex-shrink: 0;
   pointer-events: none;
 }
 
