@@ -481,7 +481,21 @@
       return `assets/icons/digits/${n}.svg`;
     }
 
+    function fieldSrc(n) {
+      return `assets/icons/digits/digit-field-${n}.svg`;
+    }
+
     function createSlot(parent, initial) {
+      const wrap = document.createElement("span");
+      wrap.className = "timecode-slot-wrap";
+      const field = document.createElement("img");
+      field.className = "timecode-field timecode-digit-field";
+      field.src = fieldSrc(initial);
+      field.width = 65;
+      field.height = 93;
+      field.alt = "";
+      wrap.appendChild(field);
+
       const slot = document.createElement("span");
       slot.className = "timecode-slot";
       const reel = document.createElement("span");
@@ -501,7 +515,8 @@
       wrapImg.alt = "";
       reel.appendChild(wrapImg);
       slot.appendChild(reel);
-      parent.appendChild(slot);
+      wrap.appendChild(slot);
+      parent.appendChild(wrap);
 
       let index = initial;
       let digit = initial;
@@ -534,6 +549,7 @@
       return {
         set(next, immediate) {
           const target = ((next % 10) + 10) % 10;
+          field.src = fieldSrc(target);
           if (target === digit && index < 10 && !immediate) return;
           digit = target;
           if (immediate || reduceMotion) {

@@ -24,6 +24,10 @@
   --hud-icon-h: calc(44.55px * var(--hud-scale));
   --hud-icon-h-hover: calc(52.66px * var(--hud-scale));
   --tc-h: calc(19.66px * var(--hud-scale));
+  --tc-w: calc(var(--tc-h) * 300 / 46);
+  /* hover source: grey digits 282×44 inside 300×62; map digits to default 300×46 */
+  --tc-w-hover: calc(var(--tc-w) * 300 / 282);
+  --tc-h-hover: calc(var(--tc-w-hover) * 62 / 300);
   --scrim-edge: 0.12;
 }
 
@@ -392,26 +396,81 @@ img {
 .hud-timecode.hud-icon {
   height: var(--tc-h);
   width: auto;
-  mix-blend-mode: unset;
+  mix-blend-mode: normal;
   filter: none;
 }
 
 .hud-timecode {
-  --tc-gap: calc(var(--tc-h) * 18 / 66);
+  --tc-gap: calc(var(--tc-h) * 16 / 66);
   --tc-colon-w: calc(var(--tc-h) * 11 / 66);
   position: absolute;
   right: 0;
   bottom: 0;
   height: var(--tc-h);
+  width: auto;
+  overflow: visible;
+}
+
+.timecode-blend {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: calc(var(--tc-h) * 17 / 66);
-  width: auto;
+  height: 100%;
+  overflow: visible;
+}
+
+.timecode-face {
+  position: relative;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--tc-gap);
+  height: 100%;
+  overflow: visible;
+}
+
+.timecode-field {
+  position: absolute;
+  left: calc(var(--tc-h) * -13.5 / 66);
+  top: calc(var(--tc-h) * -13.5 / 66);
+  display: block;
+  max-width: none;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+.timecode-prefix-field {
+  width: calc(var(--tc-h) * 78.5 / 66);
+  height: calc(var(--tc-h) * 93 / 66);
+}
+
+.timecode-colon-field {
+  width: calc(var(--tc-h) * 38 / 66);
+  height: calc(var(--tc-h) * 93 / 66);
+}
+
+.timecode-digit-field {
+  width: calc(var(--tc-h) * 65 / 66);
+  height: calc(var(--tc-h) * 93 / 66);
+}
+
+.hud-timecode:hover .timecode-field {
+  opacity: 1;
+}
+
+.hud-timecode:hover .timecode-prefix,
+.hud-timecode:hover .timecode-colon,
+.hud-timecode:hover .timecode-slot {
+  opacity: 0;
 }
 
 .hud-timecode .timecode-prefix,
 .hud-timecode .timecode-colon,
 .hud-timecode .timecode-reel img {
+  position: relative;
+  z-index: 1;
   filter: none;
 }
 
@@ -419,7 +478,6 @@ img {
   display: block;
   height: var(--tc-h);
   width: auto;
-  mix-blend-mode: unset;
   pointer-events: none;
 }
 
@@ -428,7 +486,6 @@ img {
   height: var(--tc-h);
   width: var(--tc-colon-w);
   flex-shrink: 0;
-  mix-blend-mode: unset;
   pointer-events: none;
 }
 
@@ -436,8 +493,18 @@ img {
   display: block;
   height: var(--tc-h);
   width: auto;
-  mix-blend-mode: unset;
   pointer-events: none;
+}
+
+.timecode-prefix-wrap,
+.timecode-colon-wrap,
+.timecode-slot-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  flex-shrink: 0;
+  overflow: visible;
 }
 
 .timecode-digits,
@@ -446,17 +513,23 @@ img {
   align-items: center;
   gap: var(--tc-gap);
   height: 100%;
+  overflow: visible;
 }
 
 .timecode-group {
   align-items: stretch;
 }
 
-.timecode-slot {
-  height: 100%;
+.timecode-slot-wrap {
   width: calc(var(--tc-h) * 38 / 66);
+}
+
+.timecode-slot {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  width: 100%;
   overflow: hidden;
-  flex-shrink: 0;
 }
 
 .timecode-reel {
@@ -485,10 +558,6 @@ img {
   outline-offset: 6px;
 }
 
-.hud-btn[aria-expanded="true"] {
-  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.45));
-}
-
 /* assets 3, 4, 6, 12 — hover → #ffffff */
 .hud-hover-white {
   pointer-events: auto;
@@ -497,9 +566,12 @@ img {
 }
 
 img.hud-hover-white:hover,
-svg.hud-hover-white:hover,
-.hud-timecode.hud-hover-white:hover {
+svg.hud-hover-white:hover {
   filter: brightness(0) invert(1);
+}
+
+.hud-timecode.hud-hover-white:hover {
+  filter: none;
 }
 
 /* asset 4 — L/R meter */
@@ -648,10 +720,13 @@ svg.hud-hover-white:hover,
   position: sticky;
   top: 0;
   align-self: start;
+  z-index: 1;
   height: 100cqh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
+  padding-top: 12px;
+  overflow: visible;
   pointer-events: none;
   color: var(--hud);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
@@ -659,12 +734,16 @@ svg.hud-hover-white:hover,
 
 .archive-title {
   margin: 0;
-  font-family: var(--font-sans);
-  font-size: 33px;
-  font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  line-height: 0;
+}
+
+.archive-title img {
+  display: block;
+  width: 300px;
+  height: 28px;
+  max-width: none;
+  pointer-events: none;
+  user-select: none;
 }
 
 .archive-body {

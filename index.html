@@ -105,13 +105,26 @@
             <img class="hud-icon hud-icon-rec" src="assets/icons/rec.png" width="300" height="85" alt="" />
           </div>
           <div class="hud-icon hud-timecode hud-hover-white" id="timecode" aria-hidden="true">
-              <img class="timecode-prefix" src="assets/icons/digits/prefix.svg" width="52" height="66" alt="" />
-              <div class="timecode-digits" id="timecode-digits">
-                <span class="timecode-group" id="timecode-hours"></span>
-                <img class="timecode-colon" src="assets/icons/digits/colon.svg" width="11" height="66" alt="" />
-                <span class="timecode-group" id="timecode-minutes"></span>
-                <img class="timecode-colon" src="assets/icons/digits/colon.svg" width="11" height="66" alt="" />
-                <span class="timecode-group" id="timecode-seconds"></span>
+              <div class="timecode-blend">
+                <div class="timecode-face">
+                  <span class="timecode-prefix-wrap">
+                    <img class="timecode-field timecode-prefix-field" src="assets/icons/digits/prefix-field.svg" width="78.5" height="93" alt="" />
+                    <img class="timecode-prefix" src="assets/icons/digits/prefix.svg" width="51.5" height="66" alt="" />
+                  </span>
+                  <div class="timecode-digits" id="timecode-digits">
+                    <span class="timecode-group" id="timecode-hours"></span>
+                    <span class="timecode-colon-wrap">
+                      <img class="timecode-field timecode-colon-field" src="assets/icons/digits/colon-field.svg" width="38" height="93" alt="" />
+                      <img class="timecode-colon" src="assets/icons/digits/colon.svg" width="11" height="66" alt="" />
+                    </span>
+                    <span class="timecode-group" id="timecode-minutes"></span>
+                    <span class="timecode-colon-wrap">
+                      <img class="timecode-field timecode-colon-field" src="assets/icons/digits/colon-field.svg" width="38" height="93" alt="" />
+                      <img class="timecode-colon" src="assets/icons/digits/colon.svg" width="11" height="66" alt="" />
+                    </span>
+                    <span class="timecode-group" id="timecode-seconds"></span>
+                  </div>
+                </div>
               </div>
             </div>
         </div>
@@ -146,7 +159,9 @@
       <div class="archive-shell">
         <div class="archive-scroll">
           <div class="archive-col archive-col-copy">
-            <h2 class="archive-title" id="archive-title">TRAVEL ARCHIVE</h2>
+            <h2 class="archive-title" id="archive-title">
+              <img src="assets/images/archive-title.png" width="300" height="28" alt="TRAVEL ARCHIVE" />
+            </h2>
             <p class="archive-body">
               Records of journeys that now exist only in photographs and in my memory.<br />
               Though those journeys may have tormented me when they were real,<br />
