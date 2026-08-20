@@ -15,7 +15,7 @@
   --grid-cols: 18;
   --font-mono: "IBM Plex Mono", monospace;
   --font-sans: "IBM Plex Sans", sans-serif;
-  --hud-scale: calc(min(1, 1280px / 100vw) * 1.21);
+  --hud-scale: calc(min(1, 1280px / 100vw) * 1.3915);
   --focus-h: calc(112.64px * var(--hud-scale));
   --focus-w: calc(var(--focus-h) * 177 / 176);
   --video-blur: 5px;
@@ -594,6 +594,31 @@ svg.hud-hover-white:hover {
 }
 
 /* center focus — mouse tracking */
+.focus-grid {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.focus-grid svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.focus-grid svg line {
+  stroke: #f8faff;
+  stroke-width: 0.75px;
+  stroke-opacity: 0.3;
+  vector-effect: non-scaling-stroke;
+}
+
+.focus-grid.is-hidden {
+  visibility: hidden;
+}
+
 .focus-tracker {
   position: fixed;
   pointer-events: none;
@@ -614,21 +639,46 @@ svg.hud-hover-white:hover {
   visibility: hidden;
 }
 
-.focus-coords {
+.focus-meta {
   position: absolute;
   left: calc(100% + 6px);
   top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: var(--hud-icon);
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  mix-blend-mode: screen;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.focus-coords {
   display: flex;
   align-items: baseline;
   gap: 0.45em;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
-  color: var(--hud);
+  color: var(--hud-icon);
   white-space: nowrap;
-  mix-blend-mode: screen;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.focus-place,
+.focus-date,
+.focus-weather {
+  display: block;
+  font-weight: 400;
+}
+
+.focus-place {
+  margin-top: auto;
 }
 
 .coord-group {
@@ -730,7 +780,7 @@ svg.hud-hover-white:hover {
   padding-top: 12px;
   overflow: visible;
   pointer-events: none;
-  color: var(--hud);
+  color: var(--hud-icon);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
@@ -746,15 +796,18 @@ svg.hud-hover-white:hover {
   max-width: none;
   pointer-events: none;
   user-select: none;
+  filter: var(--hud-icon-filter);
 }
 
 .archive-body {
   margin: 33px 0 0;
-  font-family: var(--font-sans);
-  font-size: 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
   font-weight: 400;
   line-height: 1.5;
-  white-space: nowrap;
+  color: var(--hud-icon);
+  max-width: 300px;
+  white-space: normal;
 }
 
 .archive-col-cards {
@@ -996,6 +1049,7 @@ body.is-archive-open .hud-bottom-row,
 body.is-archive-open .hud-top-center,
 body.is-archive-open .hud-top-group:last-of-type,
 body.is-archive-open .focus-tracker,
+body.is-archive-open .focus-grid,
 body.is-archive-open .hud-timecode,
 body.is-archive-open .hud-band,
 body.is-archive-open .video-sharp-portal {

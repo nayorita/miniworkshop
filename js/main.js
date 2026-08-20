@@ -147,6 +147,7 @@
   }
 
   const focusTracker = document.getElementById("focus-tracker");
+  const focusGrid = document.getElementById("focus-grid");
   const focusCoords = document.getElementById("focus-coords");
   const focusCenter = focusTracker?.querySelector(".focus-center");
 
@@ -297,9 +298,46 @@
     sharpVideo.style.top = `${-top}px`;
   }
 
+  function layoutFocusGrid() {
+    if (!focusGrid) return;
+    const width = focusGrid.clientWidth || window.innerWidth;
+    const height = focusGrid.clientHeight || window.innerHeight;
+    const rowPitch = Math.min(width, height) / 3;
+    const NS = "http://www.w3.org/2000/svg";
+
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("width", String(width));
+    svg.setAttribute("height", String(height));
+    svg.setAttribute("preserveAspectRatio", "none");
+    svg.setAttribute("aria-hidden", "true");
+
+    function addLine(x1, y1, x2, y2) {
+      const line = document.createElementNS(NS, "line");
+      line.setAttribute("x1", String(x1));
+      line.setAttribute("y1", String(y1));
+      line.setAttribute("x2", String(x2));
+      line.setAttribute("y2", String(y2));
+      svg.appendChild(line);
+    }
+
+    const rowYs = [];
+    for (let y = 0; y <= height + 0.5; y += rowPitch) rowYs.push(y);
+    for (let i = 1; i < rowYs.length - 1; i += 1) {
+      addLine(0, rowYs[i], width, rowYs[i]);
+    }
+    for (let i = 0; i <= 4; i += 1) {
+      addLine((width * i) / 4, 0, (width * i) / 4, height);
+    }
+
+    focusGrid.replaceChildren(svg);
+  }
+
   function setFocusVisible(visible) {
     focusTracker?.classList.toggle("is-hidden", !visible);
+    focusGrid?.classList.toggle("is-hidden", !visible);
     sharpPortal?.classList.toggle("is-hidden", !visible);
+    if (visible) layoutFocusGrid();
   }
 
   function isHudArea(target) {
@@ -345,6 +383,7 @@
   window.addEventListener("resize", () => {
     focusH = cssPx("--focus-h");
     focusW = focusH * (177 / 176);
+    layoutFocusGrid();
     const x = parseFloat(focusTracker?.style.left || String(window.innerWidth / 2));
     const y = parseFloat(focusTracker?.style.top || String(window.innerHeight / 2));
     if (isCenterZone(y)) {
@@ -355,6 +394,8 @@
       setFocusVisible(false);
     }
   });
+
+  layoutFocusGrid();
 
   const startX = window.innerWidth / 2;
   const startY = window.innerHeight / 2;
@@ -610,4 +651,131 @@
     tick();
     window.setInterval(tick, 100);
   }
+
+  function formatFocusDate(date) {
+    return new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Seoul",
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+      .format(date)
+      .toLowerCase();
+  }
+
+  function weatherPhrase(code) {
+    const n = Number(code);
+    if (n === 0) return "clear";
+    if (n === 1) return "mainly clear";
+    if (n === 2) return "partly cloudy";
+    if (n === 3) return "overcast";
+    if (n === 45 || n === 48) return "fog";
+    if (n === 51 || n === 53 || n === 55) return "drizzle";
+    if (n === 56 || n === 57) return "freezing drizzle";
+    if (n === 61 || n === 63 || n === 65) return "rain";
+    if (n === 66 || n === 67) return "freezing rain";
+    if (n === 71 || n === 73 || n === 75 || n === 77) return "snow";
+    if (n === 80 || n === 81 || n === 82) return "a shower";
+    if (n === 85 || n === 86) return "snow showers";
+    if (n === 95 || n === 96 || n === 99) return "a thunderstorm";
+    return "changing";
+  }
+
+  function seoulParts(date = new Date()) {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(date);
+    const pick = (type) => Number(parts.find((part) => part.type === type)?.value);
+    return {
+      year: pick("year"),
+      month: pick("month"),
+      day: pick("day"),
+      hour: pick("hour"),
+    };
+  }
+
+  function infoDay(now = new Date()) {
+    const seoul = seoulParts(now);
+    let utc = Date.UTC(seoul.year, seoul.month - 1, seoul.day);
+    if (seoul.hour < 10) utc -= 24 * 60 * 60 * 1000;
+    return new Date(utc);
+  }
+
+  function cacheDayKey(now = new Date()) {
+    const day = infoDay(now);
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(day);
+    const pick = (type) => parts.find((part) => part.type === type)?.value;
+    return `${pick("year")}-${pick("month")}-${pick("day")}`;
+  }
+
+  function nextTenAmSeoul(now = new Date()) {
+    const seoul = seoulParts(now);
+    let year = seoul.year;
+    let month = seoul.month;
+    let day = seoul.day;
+    if (seoul.hour >= 10) {
+      const next = new Date(Date.UTC(year, month - 1, day + 1));
+      year = next.getUTCFullYear();
+      month = next.getUTCMonth() + 1;
+      day = next.getUTCDate();
+    }
+    return Date.UTC(year, month - 1, day, 1, 0, 0);
+  }
+
+  function scheduleFocusMetaRefresh() {
+    const delay = Math.max(1000, nextTenAmSeoul() - Date.now());
+    window.setTimeout(() => {
+      refreshFocusMeta();
+      scheduleFocusMetaRefresh();
+    }, delay);
+  }
+
+  async function refreshFocusMeta() {
+    const dateEl = document.getElementById("focus-date");
+    const weatherEl = document.getElementById("focus-weather");
+    const day = infoDay();
+    const dayKey = cacheDayKey();
+    if (dateEl) dateEl.textContent = formatFocusDate(day);
+
+    const cacheKey = "focus-meta-seoul-10am";
+    try {
+      const cached = JSON.parse(localStorage.getItem(cacheKey) || "null");
+      if (cached?.day === dayKey && cached?.phrase) {
+        if (weatherEl) weatherEl.textContent = `today weather: ${cached.phrase}`;
+        return;
+      }
+    } catch {
+      /* ignore bad cache */
+    }
+
+    try {
+      const url =
+        "https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.9780&daily=weather_code&timezone=Asia/Seoul&forecast_days=1&past_days=1";
+      const res = await fetch(url);
+      if (!res.ok) return;
+      const data = await res.json();
+      const times = data?.daily?.time || [];
+      const codes = data?.daily?.weather_code || [];
+      const index = times.indexOf(dayKey);
+      const phrase = weatherPhrase(index >= 0 ? codes[index] : codes[codes.length - 1]);
+      if (weatherEl) weatherEl.textContent = `today weather: ${phrase}`;
+      localStorage.setItem(cacheKey, JSON.stringify({ day: dayKey, phrase }));
+    } catch {
+      /* keep fallback dash */
+    }
+  }
+
+  refreshFocusMeta();
+  scheduleFocusMetaRefresh();
 })();

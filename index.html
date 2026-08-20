@@ -44,6 +44,7 @@
     <div class="layer layer-scrim" aria-hidden="true"></div>
 
     <div class="layer layer-camera">
+      <div class="focus-grid is-hidden" id="focus-grid" aria-hidden="true"></div>
       <div class="grid-layout" aria-label="Camera viewfinder">
         <div class="hud-band hud-band-top" aria-hidden="true"></div>
         <div class="hud-band hud-band-bottom" aria-hidden="true"></div>
@@ -139,12 +140,17 @@
           height="176"
           alt=""
         />
-        <span class="focus-coords" id="focus-coords">
-          <span class="coord-group" data-axis="x"></span>
-          <span class="coord-unit">X</span>
-          <span class="coord-group" data-axis="y"></span>
-          <span class="coord-unit">Y</span>
-        </span>
+        <div class="focus-meta" id="focus-meta">
+          <span class="focus-coords" id="focus-coords">
+            <span class="coord-group" data-axis="x"></span>
+            <span class="coord-unit">X</span>
+            <span class="coord-group" data-axis="y"></span>
+            <span class="coord-unit">Y</span>
+          </span>
+          <span class="focus-place" id="focus-place">SEOUL, SOUTH KOREA</span>
+          <span class="focus-date" id="focus-date"></span>
+          <span class="focus-weather" id="focus-weather">today weather: —</span>
+        </div>
       </div>
     </div>
 
@@ -163,10 +169,10 @@
               <img src="assets/images/archive-title.png" width="300" height="28" alt="TRAVEL ARCHIVE" />
             </h2>
             <p class="archive-body">
-              Records of journeys that now exist only in photographs and in my memory.<br />
-              Though those journeys may have tormented me when they were real,<br />
-              now that time has distorted them and brought them to an end,<br />
-              they remain as memories of freedom—a freedom I long to return to.<br />
+              Records of journeys that now exist only in photographs and in my memory.
+              Though those journeys may have tormented me when they were real,
+              now that time has distorted them and brought them to an end,
+              they remain as memories of freedom—a freedom I long to return to.
               Every day, I take out those memories and revisit them.
             </p>
           </div>
