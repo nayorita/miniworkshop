@@ -1016,8 +1016,8 @@ svg.hud-hover-white:hover {
 .archive-card-tags li {
   padding: 1.15cqw 2cqw;
   border-radius: 1.4cqw;
-  background: #e6e6e6;
-  color: #111;
+  background-color: #c8c8c8;
+  color: #111111;
   font-size: calc(14 / 390 * 100cqw);
   line-height: 1;
   letter-spacing: 0.06em;
@@ -1026,13 +1026,16 @@ svg.hud-hover-white:hover {
   opacity: 1;
   isolation: isolate;
   mix-blend-mode: normal;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   transform: translateZ(0);
 }
 
 .archive-card:hover .archive-card-tags li,
 .archive-card:focus-visible .archive-card-tags li {
-  background: #e6e6e6;
-  color: #111;
+  background-color: #c8c8c8;
+  color: #111111;
+  opacity: 1;
 }
 
 .archive-card-caption {
