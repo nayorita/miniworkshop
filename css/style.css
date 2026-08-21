@@ -1000,10 +1000,13 @@ svg.hud-hover-white:hover {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  flex: 0 0 auto;
   gap: 1.5cqw;
   margin: 0;
   padding: 0;
   list-style: none;
+  position: relative;
+  z-index: 4;
 }
 
 .archive-card-tags + .archive-card-caption {
