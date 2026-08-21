@@ -16,14 +16,14 @@
   --font-mono: "IBM Plex Mono", monospace;
   --font-sans: "IBM Plex Sans", sans-serif;
   --hud-scale: calc(min(1, 1280px / 100vw) * 1.3915);
-  --focus-h: calc(112.64px * var(--hud-scale));
+  --focus-h: calc(112.64px * var(--hud-scale) * 0.95 * 0.95 * 0.9 * 0.9);
   --focus-w: calc(var(--focus-h) * 177 / 176);
   --video-blur: 5px;
   --hud-top-gap: calc(83.79px * var(--hud-scale));
   --hud-bottom-gap: calc(167.58px * var(--hud-scale));
-  --hud-icon-h: calc(44.55px * var(--hud-scale) * 0.95);
-  --hud-icon-h-hover: calc(52.66px * var(--hud-scale) * 0.95);
-  --tc-h: calc(19.66px * var(--hud-scale));
+  --hud-icon-h: calc(44.55px * var(--hud-scale) * 0.95 * 0.95 * 0.9 * 0.9);
+  --hud-icon-h-hover: calc(52.66px * var(--hud-scale) * 0.95 * 0.95 * 0.9 * 0.9);
+  --tc-h: calc(19.66px * var(--hud-scale) * 0.95 * 0.95 * 0.9 * 0.9);
   --tc-w: calc(var(--tc-h) * 300 / 46);
   /* hover source: grey digits 282×44 inside 300×62; map digits to default 300×46 */
   --tc-w-hover: calc(var(--tc-w) * 300 / 282);
@@ -1043,6 +1043,23 @@ body.is-archive-open .layer-camera {
 body.is-archive-open .archive-trigger {
   pointer-events: auto;
   z-index: 6;
+}
+
+body.is-archive-open .hud-btn.archive-trigger .auto-wb-default {
+  visibility: hidden;
+}
+
+body.is-archive-open .hud-btn.archive-trigger .auto-wb-hover {
+  visibility: visible;
+  height: var(--hud-icon-h-hover);
+}
+
+body.is-archive-open .hud-btn.archive-trigger:hover .auto-wb-default {
+  visibility: visible;
+}
+
+body.is-archive-open .hud-btn.archive-trigger:hover .auto-wb-hover {
+  visibility: hidden;
 }
 
 body.is-archive-open .hud-bottom-row,
