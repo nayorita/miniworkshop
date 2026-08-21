@@ -810,6 +810,7 @@ svg.hud-hover-white:hover {
   color: var(--hud-icon);
   max-width: 550px;
   white-space: normal;
+  opacity: 0.7;
 }
 
 .archive-col-cards {
@@ -835,6 +836,7 @@ svg.hud-hover-white:hover {
   word-break: keep-all;
   overflow-wrap: break-word;
   line-break: strict;
+  opacity: 0.7;
 }
 
 /* ArchiveCard — 4:5 */
