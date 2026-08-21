@@ -844,6 +844,8 @@ svg.hud-hover-white:hover {
   --ac-g: calc(24 / 390 * 100%);
   --ac-r: 10%;
   --ac-title-size: calc(26 / 390 * 100cqw);
+  --ac-body-size: calc(14 / 390 * 100cqw);
+  --ac-body-tracking: 0.02em;
   --ac-title-top: calc(var(--ac-r) * 0.35);
   --ac-gap-title-date: calc(30 / 390 * 100cqw);
   position: relative;
@@ -969,9 +971,9 @@ svg.hud-hover-white:hover {
   flex: 0 0 auto;
   margin: 0;
   padding: 0;
-  font-size: calc(14 / 390 * 100cqw);
+  font-size: var(--ac-body-size);
   line-height: 1;
-  letter-spacing: 0.02em;
+  letter-spacing: var(--ac-body-tracking);
   color: #000000;
 }
 
@@ -1018,9 +1020,9 @@ svg.hud-hover-white:hover {
   border-radius: 1.4cqw;
   background-color: #c8c8c8;
   color: #111111;
-  font-size: calc(14 / 390 * 100cqw);
+  font-size: var(--ac-body-size);
   line-height: 1;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--ac-body-tracking);
   text-transform: uppercase;
   white-space: nowrap;
   opacity: 1;
@@ -1041,10 +1043,10 @@ svg.hud-hover-white:hover {
 .archive-card-caption {
   flex: 0 0 auto;
   margin: 0;
-  font-size: calc(14 / 390 * 100cqw);
+  font-size: var(--ac-body-size);
   font-weight: 400;
   line-height: 1.35;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--ac-body-tracking);
   text-transform: uppercase;
   color: #000000;
 }
