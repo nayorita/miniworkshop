@@ -20,12 +20,31 @@
     return path;
   }
 
+  function formatDateLine(item) {
+    const date = String(item.date || "").trim();
+    const duration = String(item.duration || "")
+      .replace(/^\(|\)$/g, "")
+      .replace(/\s+/g, "")
+      .toLowerCase();
+    if (date && duration) return `${date} (${duration})`;
+    return date || duration;
+  }
+
+  function tagsFrom(item) {
+    if (Array.isArray(item.tags) && item.tags.length) return item.tags;
+    return String(item.location || "")
+      .split(/[-,]/)
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+  }
+
   function ArchiveCard(item) {
     const title = escapeHtml(item.title || "");
-    const date = escapeHtml(item.date || "");
-    const location = escapeHtml(item.location || "");
-    const durationRaw = String(item.duration || "").replace(/^\(|\)$/g, "");
-    const duration = escapeHtml(durationRaw ? `(${durationRaw})` : "");
+    const dateLine = escapeHtml(formatDateLine(item));
+    const caption = escapeHtml(item.caption || "");
+    const tags = tagsFrom(item)
+      .map((tag) => `<li>${escapeHtml(tag)}</li>`)
+      .join("");
     const src = escapeHtml(resolveArchiveImage(item.image));
     const id = escapeHtml(item.id || "");
     const shape = "public/ui/closed.svg";
@@ -36,12 +55,14 @@
         <div class="archive-card-bg" aria-hidden="true"></div>
         <div class="archive-card-fold" aria-hidden="true"></div>
         <h3 class="archive-card-title">${title}</h3>
-        <p class="archive-card-duration">${duration}</p>
-        <p class="archive-card-date">${date}</p>
-        <p class="archive-card-location">${location}</p>
-        <div class="archive-card-photo">
-          <img src="${src}" alt="${title}" loading="lazy" />
-          <div class="archive-card-fallback">NO IMAGE</div>
+        <div class="archive-card-body">
+          <p class="archive-card-date">${dateLine}</p>
+          <div class="archive-card-photo">
+            <img src="${src}" alt="${title}" loading="lazy" />
+            <div class="archive-card-fallback">NO IMAGE</div>
+          </div>
+          ${tags ? `<ul class="archive-card-tags">${tags}</ul>` : ""}
+          ${caption ? `<p class="archive-card-caption">${caption}</p>` : ""}
         </div>
       </article>
     `;
@@ -56,6 +77,15 @@
       img.addEventListener("error", showFallback);
       if (img.complete && img.naturalWidth === 0) showFallback();
     });
+    syncArchiveCopySize();
+  }
+
+  function syncArchiveCopySize() {
+    const sample = archiveGrid.querySelector(".archive-card-date");
+    if (!sample) return;
+    const size = getComputedStyle(sample).fontSize;
+    if (!size || size === "0px") return;
+    document.documentElement.style.setProperty("--archive-copy-size", size);
   }
 
   function setExpanded(isOpen) {
@@ -72,6 +102,7 @@
     document.body.classList.add("is-hud-hover");
     requestAnimationFrame(() => {
       archive.classList.add("is-open");
+      requestAnimationFrame(syncArchiveCopySize);
     });
     setExpanded(true);
   }
@@ -408,6 +439,8 @@
   }
 
   renderArchive();
+  new ResizeObserver(syncArchiveCopySize).observe(archiveGrid);
+  window.addEventListener("resize", syncArchiveCopySize);
   initLrMeter();
   initTimecode();
 

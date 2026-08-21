@@ -2,9 +2,11 @@ const archiveItems = [
   {
     id: "mexico-peru-2025",
     title: "MEXICO-PERU",
-    duration: "15DAYS",
-    date: "2025.3.21-4.5",
+    duration: "15days",
+    date: "2025.03.21 ~ 04.05",
     location: "CANCUN-CUSCO-MEXICOCITY",
+    tags: ["CANCÚN", "CUSCO", "MEXICO CITY"],
+    caption: "FINDING TEOTIHUACAN & MACHU PICCHU AFTER A GRUELING JOURNEY",
     image: "/archive/mexico-peru.jpeg",
   },
   {
