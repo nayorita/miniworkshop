@@ -692,9 +692,7 @@
       month: "short",
       day: "numeric",
       year: "numeric",
-    })
-      .format(date)
-      .toLowerCase();
+    }).format(date);
   }
 
   function weatherPhrase(code) {
@@ -785,7 +783,7 @@
     try {
       const cached = JSON.parse(localStorage.getItem(cacheKey) || "null");
       if (cached?.day === dayKey && cached?.phrase) {
-        if (weatherEl) weatherEl.textContent = `today weather: ${cached.phrase}`;
+        if (weatherEl) weatherEl.textContent = `Today Weather: ${cached.phrase}`;
         return;
       }
     } catch {
@@ -802,7 +800,7 @@
       const codes = data?.daily?.weather_code || [];
       const index = times.indexOf(dayKey);
       const phrase = weatherPhrase(index >= 0 ? codes[index] : codes[codes.length - 1]);
-      if (weatherEl) weatherEl.textContent = `today weather: ${phrase}`;
+      if (weatherEl) weatherEl.textContent = `Today Weather: ${phrase}`;
       localStorage.setItem(cacheKey, JSON.stringify({ day: dayKey, phrase }));
     } catch {
       /* keep fallback dash */

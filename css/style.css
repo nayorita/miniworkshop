@@ -679,6 +679,12 @@ svg.hud-hover-white:hover {
 
 .focus-place {
   margin-top: auto;
+  text-transform: none;
+}
+
+.focus-date,
+.focus-weather {
+  text-transform: capitalize;
 }
 
 .coord-group {
