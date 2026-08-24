@@ -686,13 +686,15 @@
   }
 
   function formatFocusDate(date) {
-    return new Intl.DateTimeFormat("en-US", {
+    const parts = new Intl.DateTimeFormat("en-US", {
       timeZone: "Asia/Seoul",
       weekday: "long",
       month: "short",
       day: "numeric",
       year: "numeric",
-    }).format(date);
+    }).formatToParts(date);
+    const pick = (type) => parts.find((part) => part.type === type)?.value;
+    return `${pick("weekday")}/${pick("month")}/${pick("day")}/${pick("year")}`;
   }
 
   function weatherPhrase(code) {

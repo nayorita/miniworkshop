@@ -990,8 +990,8 @@ svg.hud-hover-white:hover {
   flex: 0 0 auto;
   width: 100%;
   height: calc(200 / 390 * 100cqw);
-  margin-top: calc(35 / 390 * 100cqw);
-  margin-bottom: calc(20 / 390 * 100cqw);
+  margin-top: calc(15 / 390 * 100cqw);
+  margin-bottom: calc(15 / 390 * 100cqw);
   overflow: hidden;
   background: #d8d8d8;
   border-radius: 0;
@@ -1001,7 +1001,7 @@ svg.hud-hover-white:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center bottom;
   border: 0;
   border-radius: 0;
 }
@@ -1020,7 +1020,7 @@ svg.hud-hover-white:hover {
 }
 
 .archive-card-tags + .archive-card-caption {
-  margin-top: calc(20 / 390 * 100cqw);
+  margin-top: calc(15 / 390 * 100cqw);
 }
 
 .archive-card-tags li {
