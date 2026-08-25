@@ -1,5 +1,15 @@
 const archiveItems = [
   {
+    id: "west-europe-2025",
+    title: "WEST EUROPE",
+    duration: "11days",
+    date: "2025.12.15 ~ 12.25",
+    location: "ROME-FIRENZE-GRINDELWALD-PARIS",
+    tags: ["ROME", "FIRENZE", "GRINDELWALD", "PARIS"],
+    caption: "honeymoon",
+    image: "/archive/west-europe.jpg",
+  },
+  {
     id: "mexico-peru-2025",
     title: "MEXICO-PERU",
     duration: "15days",
@@ -38,22 +48,6 @@ const archiveItems = [
     tags: ["Milano", "Bolzano", "Cortina d'Ampezzo", "Firenze", "Toscana", "Rome"],
     caption: "My first trip since COVID — trekking the Dolomites in the Alps.",
     image: "/archive/italia.jpg",
-  },
-  {
-    id: "archive-3",
-    title: "ARCHIVE TRIP.",
-    duration: "5DAYS",
-    date: "11/02/2023",
-    location: "AMERICA-NYC",
-    image: "/archive/archive-3.svg",
-  },
-  {
-    id: "archive-4",
-    title: "ARCHIVE TRIP.",
-    duration: "8DAYS",
-    date: "01/15/2025",
-    location: "ASIA-TOKYO",
-    image: "/archive/archive-4.svg",
   },
 ];
 
