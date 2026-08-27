@@ -1,10 +1,30 @@
 (() => {
   const archive = document.getElementById("archive");
   const archiveGrid = document.getElementById("archive-grid");
-  const triggers = document.querySelectorAll('[data-action="archive"]');
+  const musicArchive = document.getElementById("music-archive");
+  const musicArchiveGrid = document.getElementById("music-archive-grid");
   const video = document.getElementById("bg-video");
   const sharpVideo = document.getElementById("bg-video-sharp");
   const sharpPortal = document.getElementById("video-sharp-portal");
+
+  const overlays = {
+    travel: {
+      el: archive,
+      grid: archiveGrid,
+      bodyClass: "is-travel-archive-open",
+      triggers: document.querySelectorAll('[data-action="archive"]'),
+      items: () => (Array.isArray(window.archiveItems) ? window.archiveItems : []),
+    },
+    music: {
+      el: musicArchive,
+      grid: musicArchiveGrid,
+      bodyClass: "is-music-archive-open",
+      triggers: document.querySelectorAll('[data-action="music-archive"]'),
+      items: () => (Array.isArray(window.musicItems) ? window.musicItems : []),
+    },
+  };
+
+  let openKind = null;
 
   function escapeHtml(value) {
     return String(value)
@@ -68,80 +88,93 @@
     `;
   }
 
-  function renderArchive() {
-    const items = Array.isArray(window.archiveItems) ? window.archiveItems : archiveItems;
-    archiveGrid.innerHTML = items.map(ArchiveCard).join("");
-    archiveGrid.querySelectorAll(".archive-card-photo img").forEach((img) => {
+  function renderCards(grid, items) {
+    if (!grid) return;
+    grid.innerHTML = items.map(ArchiveCard).join("");
+    grid.querySelectorAll(".archive-card-photo img").forEach((img) => {
       const frame = img.closest(".archive-card-photo");
       const showFallback = () => frame?.classList.add("is-fallback");
       img.addEventListener("error", showFallback);
       if (img.complete && img.naturalWidth === 0) showFallback();
     });
-    syncArchiveCopySize();
+    syncArchiveCopySize(grid);
   }
 
-  function syncArchiveCopySize() {
-    const sample = archiveGrid.querySelector(".archive-card-date");
+  function syncArchiveCopySize(grid = archiveGrid) {
+    const sample = grid?.querySelector(".archive-card-date");
     if (!sample) return;
     const size = getComputedStyle(sample).fontSize;
     if (!size || size === "0px") return;
     document.documentElement.style.setProperty("--archive-copy-size", size);
   }
 
-  function setExpanded(isOpen) {
-    triggers.forEach((el) => {
+  function setExpanded(kind, isOpen) {
+    overlays[kind].triggers.forEach((el) => {
       if (el.hasAttribute("aria-expanded")) {
         el.setAttribute("aria-expanded", String(isOpen));
       }
     });
   }
 
-  function openArchive() {
-    archive.hidden = false;
-    document.body.classList.add("is-archive-open");
+  function hideOverlay(kind, immediate) {
+    const overlay = overlays[kind];
+    if (!overlay?.el) return;
+    overlay.el.classList.remove("is-open");
+    document.body.classList.remove(overlay.bodyClass);
+    setExpanded(kind, false);
+    if (immediate) {
+      overlay.el.hidden = true;
+      return;
+    }
+    const onEnd = (event) => {
+      if (event.propertyName !== "opacity") return;
+      overlay.el.removeEventListener("transitionend", onEnd);
+      if (!overlay.el.classList.contains("is-open")) {
+        overlay.el.hidden = true;
+      }
+    };
+    overlay.el.addEventListener("transitionend", onEnd);
+  }
+
+  function openArchive(kind) {
+    const overlay = overlays[kind];
+    if (!overlay?.el) return;
+    if (openKind && openKind !== kind) hideOverlay(openKind, true);
+    overlay.el.hidden = false;
+    document.body.classList.add("is-archive-open", overlay.bodyClass);
     document.body.classList.add("is-hud-hover");
     requestAnimationFrame(() => {
-      archive.classList.add("is-open");
-      requestAnimationFrame(syncArchiveCopySize);
+      overlay.el.classList.add("is-open");
+      requestAnimationFrame(() => syncArchiveCopySize(overlay.grid));
     });
-    setExpanded(true);
+    setExpanded(kind, true);
+    openKind = kind;
   }
 
   function closeArchive() {
-    archive.classList.remove("is-open");
+    if (!openKind) return;
+    const kind = openKind;
+    hideOverlay(kind, false);
     document.body.classList.remove("is-archive-open");
-    setExpanded(false);
-
-    const onEnd = (event) => {
-      if (event.propertyName !== "opacity") return;
-      archive.removeEventListener("transitionend", onEnd);
-      if (!archive.classList.contains("is-open")) {
-        archive.hidden = true;
-      }
-    };
-
-    archive.addEventListener("transitionend", onEnd);
+    openKind = null;
   }
 
-  function toggleArchive() {
-    if (archive.classList.contains("is-open")) {
-      closeArchive();
-    } else {
-      openArchive();
-    }
+  function toggleArchive(kind) {
+    if (openKind === kind) closeArchive();
+    else openArchive(kind);
   }
 
-  triggers.forEach((el) => {
-    el.addEventListener("click", (event) => {
-      event.stopPropagation();
-      toggleArchive();
+  Object.keys(overlays).forEach((kind) => {
+    overlays[kind].triggers.forEach((el) => {
+      el.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleArchive(kind);
+      });
     });
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && archive.classList.contains("is-open")) {
-      closeArchive();
-    }
+    if (event.key === "Escape" && openKind) closeArchive();
   });
 
   if (video) {
@@ -366,9 +399,7 @@
 
   function setFocusVisible(visible) {
     focusTracker?.classList.toggle("is-hidden", !visible);
-    focusGrid?.classList.toggle("is-hidden", !visible);
     sharpPortal?.classList.toggle("is-hidden", !visible);
-    if (visible) layoutFocusGrid();
   }
 
   function isHudArea(target) {
@@ -438,9 +469,15 @@
     setFocusVisible(false);
   }
 
-  renderArchive();
-  new ResizeObserver(syncArchiveCopySize).observe(archiveGrid);
-  window.addEventListener("resize", syncArchiveCopySize);
+  renderCards(archiveGrid, overlays.travel.items());
+  renderCards(musicArchiveGrid, overlays.music.items());
+  const onArchiveResize = () => {
+    const grid = openKind ? overlays[openKind].grid : archiveGrid;
+    syncArchiveCopySize(grid);
+  };
+  if (archiveGrid) new ResizeObserver(onArchiveResize).observe(archiveGrid);
+  if (musicArchiveGrid) new ResizeObserver(onArchiveResize).observe(musicArchiveGrid);
+  window.addEventListener("resize", onArchiveResize);
   initLrMeter();
   initTimecode();
 
@@ -685,7 +722,7 @@
     window.setInterval(tick, 100);
   }
 
-  function formatFocusDate(date) {
+  function formatFocusDate(date = new Date()) {
     const parts = new Intl.DateTimeFormat("en-US", {
       timeZone: "Asia/Seoul",
       weekday: "long",
@@ -733,23 +770,15 @@
     };
   }
 
-  function infoDay(now = new Date()) {
+  function seoulDayKey(now = new Date()) {
     const seoul = seoulParts(now);
-    let utc = Date.UTC(seoul.year, seoul.month - 1, seoul.day);
-    if (seoul.hour < 10) utc -= 24 * 60 * 60 * 1000;
-    return new Date(utc);
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${seoul.year}-${pad(seoul.month)}-${pad(seoul.day)}`;
   }
 
-  function cacheDayKey(now = new Date()) {
-    const day = infoDay(now);
-    const parts = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Asia/Seoul",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).formatToParts(day);
-    const pick = (type) => parts.find((part) => part.type === type)?.value;
-    return `${pick("year")}-${pick("month")}-${pick("day")}`;
+  function nextSeoulMidnight(now = new Date()) {
+    const seoul = seoulParts(now);
+    return Date.UTC(seoul.year, seoul.month - 1, seoul.day, 15, 0, 0);
   }
 
   function nextTenAmSeoul(now = new Date()) {
@@ -767,7 +796,11 @@
   }
 
   function scheduleFocusMetaRefresh() {
-    const delay = Math.max(1000, nextTenAmSeoul() - Date.now());
+    const now = Date.now();
+    const delay = Math.max(
+      1000,
+      Math.min(nextSeoulMidnight(), nextTenAmSeoul()) - now
+    );
     window.setTimeout(() => {
       refreshFocusMeta();
       scheduleFocusMetaRefresh();
@@ -777,9 +810,8 @@
   async function refreshFocusMeta() {
     const dateEl = document.getElementById("focus-date");
     const weatherEl = document.getElementById("focus-weather");
-    const day = infoDay();
-    const dayKey = cacheDayKey();
-    if (dateEl) dateEl.textContent = formatFocusDate(day);
+    const dayKey = seoulDayKey();
+    if (dateEl) dateEl.textContent = formatFocusDate();
 
     const cacheKey = "focus-meta-seoul-10am";
     try {
@@ -794,14 +826,14 @@
 
     try {
       const url =
-        "https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.9780&daily=weather_code&timezone=Asia/Seoul&forecast_days=1&past_days=1";
+        "https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.9780&current=weather_code&daily=weather_code&timezone=Asia/Seoul&forecast_days=1";
       const res = await fetch(url);
       if (!res.ok) return;
       const data = await res.json();
-      const times = data?.daily?.time || [];
-      const codes = data?.daily?.weather_code || [];
-      const index = times.indexOf(dayKey);
-      const phrase = weatherPhrase(index >= 0 ? codes[index] : codes[codes.length - 1]);
+      const code =
+        data?.current?.weather_code ??
+        data?.daily?.weather_code?.[0];
+      const phrase = weatherPhrase(code);
       if (weatherEl) weatherEl.textContent = `Today Weather: ${phrase}`;
       localStorage.setItem(cacheKey, JSON.stringify({ day: dayKey, phrase }));
     } catch {

@@ -48,7 +48,7 @@
     <div class="layer layer-scrim" aria-hidden="true"></div>
 
     <div class="layer layer-camera">
-      <div class="focus-grid is-hidden" id="focus-grid" aria-hidden="true"></div>
+      <div class="focus-grid" id="focus-grid" aria-hidden="true"></div>
       <div class="grid-layout" aria-label="Camera viewfinder">
         <div class="hud-band hud-band-top" aria-hidden="true"></div>
         <div class="hud-band hud-band-bottom" aria-hidden="true"></div>
@@ -84,10 +84,17 @@
           </div>
 
           <div class="hud-top-group">
-            <span class="hud-focus-swap">
-              <img class="hud-icon focus-default" src="assets/icons/focus.png" width="150" height="150" alt="" />
+            <button
+              type="button"
+              class="hud-btn music-trigger"
+              data-action="music-archive"
+              aria-label="Open music archive"
+              aria-controls="music-archive"
+              aria-expanded="false"
+            >
+              <img class="focus-default" src="assets/icons/focus.png" width="150" height="150" alt="" />
               <img class="focus-hover" src="assets/icons/focus-hover.png" width="150" height="150" alt="" />
-            </span>
+            </button>
             <img class="hud-icon hud-hover-white" src="assets/icons/txt-jpg.png" width="150" height="150" alt="" />
             <img class="hud-icon" src="assets/icons/battery.png" width="205" height="150" alt="" />
           </div>
@@ -190,7 +197,46 @@
       </div>
     </aside>
 
+    <aside
+      class="layer layer-archive"
+      id="music-archive"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="music-archive-title"
+      hidden
+    >
+      <div class="archive-shell">
+        <div class="archive-scroll">
+          <div class="archive-col archive-col-copy">
+            <h2 class="archive-title" id="music-archive-title">
+              <img src="assets/images/music-archive-title.svg" width="300" height="28" alt="MUSIC ARCHIVE" />
+            </h2>
+            <p class="archive-body">
+              When I was a kid, I had a terminal case of Hongdae syndrome. I listened to Nirvana and the Beatles on a CD player—now a Y2K relic—tuned in to Bae Chul-soo’s Music Camp, and sang Kim Kwang-seok at karaoke, convinced I was special. I wasn’t. I was ordinary—worse, a loser. I’m mostly cured now. It only flares up once or twice a year, in the standing section when an international act comes to Korea. For a few hours, I get smug about the setlist—“They’re playing this?” “They skipped that?”—and become the special person with special taste my younger self dreamed of. A smug little archive for fellow occasional sufferers.
+            </p>
+            <p class="archive-coda">
+              나는 초등학생 때 홍대병 말기 판정을 받았었다.
+              지금은 Y2K의 유물인 cd player로 너바나와 비틀스 음악을 들었고
+              집에 하나씩 있었던 라디오로 배철수의 음악캠프를 들었다.
+              노래방에가서 김광석의 노래를 부르며 ‘특별한 나’에 심취해있었던 시절이었다.
+              특별하다고 믿었던 나는 평범한 인간 아니 그보다 더 못한 루저였고
+              나의 홍대병은 완치되어 오로지 내한공연 스탠딩석에서만 가끔 발현되는
+              조건부 병으로 남았다.
+              지금도 일 년에 1-2번은 꼭 내한 공연에 간다.
+              가서 ‘와 이걸 불러주네’ ‘와 이걸 안 불러주네’ 잠시나마 꺼드럭거리며
+              그 몇 시간만큼은 초등학생이었던 내가 꿈꿨던 특별한 취향을 가진 특별한 인간으로 살다 온다.
+              가끔 홍대병을 앓고있는 사람들은 이해할 수 있는 꺼드럭 아카이브
+            </p>
+          </div>
+          <div class="archive-col archive-col-cards">
+            <div class="archive-grid" id="music-archive-grid"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
     <script src="js/archiveItems.js"></script>
+    <script src="js/musicItems.js"></script>
     <script src="js/main.js"></script>
   </body>
 </html>

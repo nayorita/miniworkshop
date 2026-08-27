@@ -6,7 +6,7 @@ const archiveItems = [
     date: "2025.12.15 ~ 12.25",
     location: "ROME-FIRENZE-GRINDELWALD-PARIS",
     tags: ["ROME", "FIRENZE", "GRINDELWALD", "PARIS"],
-    caption: "honeymoon",
+    caption: "Honeymoon: Nayeon’s Guided Tour – The Fight Ending",
     image: "/archive/west-europe.jpg",
   },
   {

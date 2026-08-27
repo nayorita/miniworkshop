@@ -3,7 +3,7 @@
   --ink: #0a0c10;
   --hud: #ffffff;
   --hud-icon: #F8FAFF;
-  --hud-active: #FF5500;
+  --hud-active: #BFFF00;
   --hud-icon-filter: brightness(0) saturate(100%) invert(98%) sepia(8%) saturate(749%) hue-rotate(186deg) brightness(103%) contrast(101%);
   --hud-dim: rgba(255, 255, 255, 0.55);
   --panel: rgba(10, 12, 16, 0.9);
@@ -100,7 +100,8 @@ img {
   z-index: 3;
 }
 
-.layer-camera .archive-trigger {
+.layer-camera .archive-trigger,
+.layer-camera .music-trigger {
   pointer-events: auto;
 }
 
@@ -326,8 +327,42 @@ img {
 }
 
 .hud-icon[src$="focus.png"],
-.hud-focus-swap .focus-hover {
+.music-trigger .focus-hover {
   filter: none;
+}
+
+.hud-btn.music-trigger {
+  position: relative;
+  height: var(--hud-icon-h);
+}
+
+.hud-btn.music-trigger:hover {
+  opacity: 1;
+}
+
+.hud-btn.music-trigger img {
+  filter: none;
+}
+
+.hud-btn.music-trigger .focus-hover {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  height: var(--hud-icon-h-hover);
+  width: auto;
+  max-width: none;
+  mix-blend-mode: screen;
+  transform: translate(-50%, -50%);
+  visibility: hidden;
+}
+
+.hud-btn.music-trigger:hover .focus-default {
+  visibility: hidden;
+}
+
+.hud-btn.music-trigger:hover .focus-hover {
+  visibility: visible;
 }
 
 .hud-focus-swap {
@@ -810,9 +845,9 @@ svg.hud-hover-white:hover {
 .archive-body {
   margin: 33px 0 0;
   font-family: var(--font-mono);
-  font-size: var(--archive-copy-size, 14px);
+  font-size: 14px;
   font-weight: 400;
-  line-height: 1.5;
+  line-height: 1.45;
   color: var(--hud-icon);
   max-width: 550px;
   white-space: normal;
@@ -832,12 +867,12 @@ svg.hud-hover-white:hover {
 }
 
 .archive-coda {
-  margin: 50px 0 0;
+  margin: 20px 0 0;
   max-width: 550px;
   font-family: var(--font-pretendard);
-  font-size: var(--archive-copy-size, 14px);
+  font-size: 15px;
   font-weight: 400;
-  line-height: 1.7;
+  line-height: 1.6;
   color: var(--hud-icon);
   word-break: keep-all;
   overflow-wrap: break-word;
@@ -1098,31 +1133,48 @@ body.is-archive-open .layer-camera {
   pointer-events: none;
 }
 
-body.is-archive-open .archive-trigger {
+body.is-travel-archive-open .archive-trigger,
+body.is-music-archive-open .music-trigger {
   pointer-events: auto;
   z-index: 6;
 }
 
-body.is-archive-open .hud-btn.archive-trigger .auto-wb-default {
+body.is-travel-archive-open .hud-btn.archive-trigger .auto-wb-default {
   visibility: hidden;
 }
 
-body.is-archive-open .hud-btn.archive-trigger .auto-wb-hover {
+body.is-travel-archive-open .hud-btn.archive-trigger .auto-wb-hover {
   visibility: visible;
   height: var(--hud-icon-h-hover);
 }
 
-body.is-archive-open .hud-btn.archive-trigger:hover .auto-wb-default {
+body.is-travel-archive-open .hud-btn.archive-trigger:hover .auto-wb-default {
   visibility: visible;
 }
 
-body.is-archive-open .hud-btn.archive-trigger:hover .auto-wb-hover {
+body.is-travel-archive-open .hud-btn.archive-trigger:hover .auto-wb-hover {
+  visibility: hidden;
+}
+
+body.is-music-archive-open .hud-btn.music-trigger .focus-default {
+  visibility: hidden;
+}
+
+body.is-music-archive-open .hud-btn.music-trigger .focus-hover {
+  visibility: visible;
+  height: var(--hud-icon-h-hover);
+}
+
+body.is-music-archive-open .hud-btn.music-trigger:hover .focus-default {
+  visibility: visible;
+}
+
+body.is-music-archive-open .hud-btn.music-trigger:hover .focus-hover {
   visibility: hidden;
 }
 
 body.is-archive-open .hud-bottom-row,
 body.is-archive-open .hud-top-center,
-body.is-archive-open .hud-top-group:last-of-type,
 body.is-archive-open .focus-tracker,
 body.is-archive-open .focus-grid,
 body.is-archive-open .hud-timecode,
@@ -1131,7 +1183,19 @@ body.is-archive-open .video-sharp-portal {
   display: none;
 }
 
-body.is-archive-open .hud-top-group:first-of-type > :not(.archive-trigger) {
+body.is-travel-archive-open .hud-top-group:last-of-type {
+  display: none;
+}
+
+body.is-travel-archive-open .hud-top-group:first-of-type > :not(.archive-trigger) {
+  display: none;
+}
+
+body.is-music-archive-open .hud-top-group:first-of-type {
+  display: none;
+}
+
+body.is-music-archive-open .hud-top-group:last-of-type > :not(.music-trigger) {
   display: none;
 }
 
