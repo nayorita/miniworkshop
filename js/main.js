@@ -3,6 +3,7 @@
   const archiveGrid = document.getElementById("archive-grid");
   const musicArchive = document.getElementById("music-archive");
   const musicArchiveGrid = document.getElementById("music-archive-grid");
+  const musicDetail = document.getElementById("music-detail");
   const video = document.getElementById("bg-video");
   const sharpVideo = document.getElementById("bg-video-sharp");
   const sharpPortal = document.getElementById("video-sharp-portal");
@@ -65,6 +66,9 @@
     const tags = tagsFrom(item)
       .map((tag) => `<li>${escapeHtml(tag)}</li>`)
       .join("");
+    const tagList = tags
+      ? `<ul class="archive-card-tags">${tags}<li class="archive-card-tags-more" hidden role="button" tabindex="0" aria-expanded="false" aria-label="Show all cities">+ 0</li></ul>`
+      : "";
     const src = escapeHtml(resolveArchiveImage(item.image));
     const id = escapeHtml(item.id || "");
     const shape = "public/ui/closed.svg";
@@ -81,8 +85,10 @@
             <img src="${src}" alt="${title}" loading="lazy" />
             <div class="archive-card-fallback">NO IMAGE</div>
           </div>
-          ${tags ? `<ul class="archive-card-tags">${tags}</ul>` : ""}
-          ${caption ? `<p class="archive-card-caption">${caption}</p>` : ""}
+          <div class="archive-card-lower">
+            ${tagList}
+            ${caption ? `<p class="archive-card-caption">${caption}</p>` : ""}
+          </div>
         </div>
       </article>
     `;
@@ -97,7 +103,384 @@
       img.addEventListener("error", showFallback);
       if (img.complete && img.naturalWidth === 0) showFallback();
     });
+    clampArchiveTagLists(grid);
+    bindArchiveTagExpand(grid);
+    if (grid === musicArchiveGrid) bindMusicCardOpen(grid);
     syncArchiveCopySize(grid);
+  }
+
+  function musicDetailFrom(item) {
+    const detail = item.detail || {};
+    const tags = Array.isArray(detail.tags) && detail.tags.length
+      ? detail.tags
+      : tagsFrom(item);
+    const rows = Array.isArray(detail.rows) && detail.rows.length
+      ? detail.rows
+      : [
+          { label: "공연명", value: item.caption || item.title || "" },
+          { label: "공연 일시", value: item.date || "" },
+          { label: "공연 장소", value: item.location || "" },
+        ];
+    const images = (Array.isArray(detail.images) && detail.images.length
+      ? detail.images
+      : [detail.image || item.image || ""]
+    )
+      .map((path) => resolveArchiveImage(path))
+      .filter(Boolean);
+    return {
+      title: item.title || "",
+      titleSvg: detail.titleSvg || "",
+      rows,
+      body: detail.body || item.caption || "",
+      tags,
+      images,
+    };
+  }
+
+  function dotTitleHtml(text) {
+    return String(text || "")
+      .toUpperCase()
+      .split("")
+      .map((ch) => {
+        if (ch === " ") return `<span class="dot-title-space" aria-hidden="true"></span>`;
+        const key = ch.toLowerCase();
+        if (!/[a-z]/.test(key)) return "";
+        const width = key === "m" ? 149 : key === "w" ? 150 : 87;
+        return `<img src="assets/fonts/dot-title/${key}.png" width="${width}" height="150" alt="" draggable="false" />`;
+      })
+      .join("");
+  }
+
+  function renderDotTitles(root = document) {
+    root.querySelectorAll("[data-dot-title]").forEach((el) => {
+      const label = el.dataset.dotTitle || "";
+      el.setAttribute("aria-label", label);
+      el.innerHTML = dotTitleHtml(label);
+    });
+  }
+
+  function renderMusicDetail(item) {
+    if (!musicDetail || !item) return;
+    const data = musicDetailFrom(item);
+    const title = data.title
+      ? dotTitleHtml(data.title)
+      : `<span class="music-detail-title-text">${escapeHtml(data.title)}</span>`;
+    const rows = data.rows
+      .map(
+        (row) =>
+          `<div><dt>${escapeHtml(row.label || "")}</dt><dd>${escapeHtml(row.value || "")}</dd></div>`
+      )
+      .join("");
+    const tags = data.tags
+      .map((tag) => `<li>${escapeHtml(tag)}</li>`)
+      .join("");
+    musicDetail.innerHTML = `
+      <div class="music-detail-copy">
+        <h2 class="music-detail-title" aria-label="${escapeHtml(data.title)}">${title}</h2>
+        <dl class="music-detail-meta">${rows}</dl>
+        ${data.body ? `<p class="music-detail-body">${escapeHtml(data.body)}</p>` : ""}
+      </div>
+      <div class="music-detail-media">
+        <div class="music-detail-photo">
+          <img src="${escapeHtml(data.images[0] || "")}" alt="${escapeHtml(data.title)}" />
+          ${
+            data.images.length > 1
+              ? `<div class="music-detail-navs">
+            <button type="button" class="music-detail-nav" data-photo-step="-1" aria-label="Previous photo">
+              <img src="assets/icons/arrow-left.png" width="87" height="150" alt="" />
+            </button>
+            <button type="button" class="music-detail-nav" data-photo-step="1" aria-label="Next photo">
+              <img src="assets/icons/arrow-right.png" width="87" height="150" alt="" />
+            </button>
+          </div>`
+              : ""
+          }
+        </div>
+        ${tags ? `<ul class="music-detail-tags">${tags}</ul>` : ""}
+      </div>
+    `;
+  }
+
+  let musicOpenLock = false;
+  let musicFlyEl = null;
+  let lastMusicCard = null;
+
+  function clearMusicFly() {
+    musicFlyEl?.remove();
+    musicFlyEl = null;
+  }
+
+  function placeMusicRect(el, rect) {
+    el.style.left = `${rect.left}px`;
+    el.style.top = `${rect.top}px`;
+    el.style.width = `${rect.width}px`;
+    el.style.height = `${rect.height}px`;
+  }
+
+  function playMusicHero(srcUrl, fromRect, getToRect, onDone) {
+    clearMusicFly();
+    const frame = document.createElement("div");
+    frame.className = "music-fly-frame";
+    const img = document.createElement("img");
+    img.alt = "";
+    img.src = srcUrl;
+    frame.appendChild(img);
+    placeMusicRect(frame, fromRect);
+    document.body.appendChild(frame);
+    musicFlyEl = frame;
+
+    let tries = 0;
+    const start = () => {
+      const to = getToRect();
+      if ((!to || to.width < 8) && tries < 8) {
+        tries += 1;
+        requestAnimationFrame(start);
+        return;
+      }
+      frame.classList.add("is-flying");
+      placeMusicRect(frame, to);
+    };
+    requestAnimationFrame(() => requestAnimationFrame(start));
+
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      frame.removeEventListener("transitionend", onEnd);
+      onDone();
+    };
+    const onEnd = (event) => {
+      if (event.target !== frame) return;
+      if (event.propertyName !== "width" && event.propertyName !== "left") return;
+      finish();
+    };
+    frame.addEventListener("transitionend", onEnd);
+    window.setTimeout(finish, 720);
+  }
+
+  function showMusicDetail(item) {
+    renderMusicDetail(item);
+    musicDetail.hidden = false;
+    musicDetail.dataset.id = item.id || "";
+    musicDetail.dataset.photo = "0";
+    musicArchive.classList.add("is-detail-open");
+    musicArchive.classList.remove("is-opening-detail", "is-detail-ready");
+    document.body.classList.add("is-music-detail-open");
+  }
+
+  function resetMusicOpenCards() {
+    musicArchiveGrid?.querySelectorAll(".archive-card").forEach((el) => {
+      el.classList.remove("is-pushed", "is-opening", "is-returning");
+      el.style.removeProperty("--push-x");
+      el.style.removeProperty("--push-y");
+    });
+  }
+
+  function playMusicOpen(item, card) {
+    musicOpenLock = true;
+    lastMusicCard = card;
+    const source = card.querySelector(".archive-card-photo img") || card;
+    const sr = source.getBoundingClientRect();
+    const srcUrl = source.currentSrc || source.src || musicDetailFrom(item).images[0] || "";
+
+    renderMusicDetail(item);
+    musicDetail.hidden = false;
+    musicDetail.dataset.id = item.id || "";
+    musicDetail.dataset.photo = "0";
+    musicArchive.classList.add("is-detail-open", "is-opening-detail");
+    document.body.classList.add("is-music-detail-open");
+    card.classList.add("is-opening");
+
+    const dest = musicDetail.querySelector(".music-detail-photo");
+    playMusicHero(srcUrl, sr, () => dest?.getBoundingClientRect(), () => {
+      musicArchive.classList.add("is-detail-ready");
+      window.setTimeout(() => {
+        clearMusicFly();
+        musicArchive.classList.remove("is-opening-detail", "is-detail-ready");
+        resetMusicOpenCards();
+        musicOpenLock = false;
+      }, 160);
+    });
+  }
+
+  function openMusicDetail(item, card) {
+    if (!musicArchive || !item || musicOpenLock) return;
+    if (card && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      playMusicOpen(item, card);
+      return;
+    }
+    showMusicDetail(item);
+  }
+
+  function stepMusicPhoto(step) {
+    const item = overlays.music.items().find((entry) => entry.id === musicDetail?.dataset.id);
+    if (!item) return;
+    const images = musicDetailFrom(item).images;
+    if (images.length < 2) return;
+    const index = Number(musicDetail.dataset.photo || 0);
+    const next = (index + step + images.length) % images.length;
+    musicDetail.dataset.photo = String(next);
+    const photo = musicDetail.querySelector(".music-detail-photo > img");
+    if (photo) photo.src = images[next];
+  }
+
+  function finishCloseMusicDetail() {
+    clearMusicFly();
+    resetMusicOpenCards();
+    musicOpenLock = false;
+    lastMusicCard = null;
+    musicArchive?.classList.remove(
+      "is-detail-open",
+      "is-opening-detail",
+      "is-closing-detail",
+      "is-closing-prep",
+      "is-detail-ready"
+    );
+    document.body.classList.remove("is-music-detail-open");
+    if (musicDetail) {
+      musicDetail.hidden = true;
+      musicDetail.innerHTML = "";
+    }
+  }
+
+  function playMusicClose() {
+    const id = musicDetail?.dataset.id || "";
+    const card =
+      lastMusicCard ||
+      musicArchiveGrid?.querySelector(`.archive-card[data-id="${id}"]`);
+    if (!card) {
+      finishCloseMusicDetail();
+      return;
+    }
+
+    musicOpenLock = true;
+    document.body.classList.remove("is-music-detail-open");
+
+    const dest = musicDetail.querySelector(".music-detail-photo");
+    const destImg = dest?.querySelector("img");
+    const photo = card.querySelector(".archive-card-photo") || card;
+    const dr = dest?.getBoundingClientRect();
+    const sr = photo.getBoundingClientRect();
+    const srcUrl = destImg?.currentSrc || destImg?.src || photo.querySelector("img")?.src || "";
+
+    card.classList.add("is-returning");
+    playMusicHero(srcUrl, dr || sr, () => sr, () => {
+      finishCloseMusicDetail();
+    });
+    musicArchive.classList.add("is-closing-detail");
+  }
+
+  function closeMusicDetail(immediate) {
+    if (!musicArchive?.classList.contains("is-detail-open")) return;
+    if (musicOpenLock && !immediate) return;
+    if (immediate || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      finishCloseMusicDetail();
+      return;
+    }
+    playMusicClose();
+  }
+
+  function bindMusicCardOpen(grid) {
+    if (!grid || grid.dataset.musicDetailBound) return;
+    grid.dataset.musicDetailBound = "true";
+    grid.addEventListener("click", (event) => {
+      if (event.target.closest(".archive-card-tags-more")) return;
+      const card = event.target.closest(".archive-card");
+      if (!card) return;
+      const item = overlays.music.items().find((entry) => entry.id === card.dataset.id);
+      if (item) openMusicDetail(item, card);
+    });
+    grid.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      if (event.target.closest(".archive-card-tags-more")) return;
+      const card = event.target.closest(".archive-card");
+      if (!card) return;
+      event.preventDefault();
+      const item = overlays.music.items().find((entry) => entry.id === card.dataset.id);
+      if (item) openMusicDetail(item, card);
+    });
+  }
+
+  function toggleArchiveTags(card) {
+    if (!card) return;
+    const list = card.querySelector(".archive-card-tags");
+    const more = list?.querySelector(".archive-card-tags-more");
+    if (!list || !more) return;
+
+    if (card.classList.contains("is-tags-open")) {
+      card.classList.remove("is-tags-open");
+      more.setAttribute("aria-expanded", "false");
+      more.setAttribute("aria-label", "Show all cities");
+      clampArchiveTags(list);
+      return;
+    }
+
+    card.classList.add("is-tags-open");
+    list.querySelectorAll("li:not(.archive-card-tags-more)").forEach((tag) => {
+      tag.hidden = false;
+    });
+    more.hidden = false;
+    more.textContent = "−";
+    more.setAttribute("aria-expanded", "true");
+    more.setAttribute("aria-label", "Hide extra cities");
+  }
+
+  function bindArchiveTagExpand(grid) {
+    if (!grid || grid.dataset.tagExpandBound) return;
+    grid.dataset.tagExpandBound = "true";
+    grid.addEventListener("click", (event) => {
+      const more = event.target.closest(".archive-card-tags-more");
+      if (!more || more.hidden) return;
+      event.preventDefault();
+      event.stopPropagation();
+      toggleArchiveTags(more.closest(".archive-card"));
+    });
+    grid.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      const more = event.target.closest(".archive-card-tags-more");
+      if (!more || more.hidden) return;
+      event.preventDefault();
+      toggleArchiveTags(more.closest(".archive-card"));
+    });
+  }
+
+  function clampArchiveTags(list) {
+    if (list.closest(".archive-card")?.classList.contains("is-tags-open")) return;
+    const more = list.querySelector(".archive-card-tags-more");
+    const tags = [...list.querySelectorAll("li:not(.archive-card-tags-more)")];
+    if (!more || !tags.length || list.clientWidth === 0) return;
+
+    const onRow = (el, top) => Math.abs(el.offsetTop - top) <= 1;
+    const fits = () => {
+      const visible = tags.filter((tag) => !tag.hidden);
+      if (!visible.length) return true;
+      const top = visible[0].offsetTop;
+      return (
+        visible.every((tag) => onRow(tag, top)) &&
+        (more.hidden || onRow(more, top))
+      );
+    };
+
+    tags.forEach((tag) => {
+      tag.hidden = false;
+    });
+    more.hidden = true;
+    if (fits()) return;
+
+    more.hidden = false;
+    for (let i = tags.length - 1; i >= 0; i -= 1) {
+      tags[i].hidden = true;
+      more.textContent = `+ ${tags.filter((tag) => tag.hidden).length}`;
+      if (fits()) break;
+    }
+
+    const hiddenCount = tags.filter((tag) => tag.hidden).length;
+    if (!hiddenCount) more.hidden = true;
+    else more.textContent = `+ ${hiddenCount}`;
+  }
+
+  function clampArchiveTagLists(grid) {
+    grid?.querySelectorAll(".archive-card-tags").forEach(clampArchiveTags);
   }
 
   function syncArchiveCopySize(grid = archiveGrid) {
@@ -120,17 +503,21 @@
     const overlay = overlays[kind];
     if (!overlay?.el) return;
     overlay.el.classList.remove("is-open");
+    overlay.el.inert = true;
+    if (kind === "music") closeMusicDetail(true);
     document.body.classList.remove(overlay.bodyClass);
     setExpanded(kind, false);
     if (immediate) {
       overlay.el.hidden = true;
+      if (!openKind) document.body.classList.remove("is-archive-open");
       return;
     }
     const onEnd = (event) => {
-      if (event.propertyName !== "opacity") return;
+      if (event.target !== overlay.el || event.propertyName !== "opacity") return;
       overlay.el.removeEventListener("transitionend", onEnd);
       if (!overlay.el.classList.contains("is-open")) {
         overlay.el.hidden = true;
+        if (!openKind) document.body.classList.remove("is-archive-open");
       }
     };
     overlay.el.addEventListener("transitionend", onEnd);
@@ -141,11 +528,15 @@
     if (!overlay?.el) return;
     if (openKind && openKind !== kind) hideOverlay(openKind, true);
     overlay.el.hidden = false;
-    document.body.classList.add("is-archive-open", overlay.bodyClass);
-    document.body.classList.add("is-hud-hover");
+    overlay.el.inert = false;
+    overlay.el.classList.remove("is-open");
+    void overlay.el.offsetWidth;
+    document.body.classList.add("is-archive-open", overlay.bodyClass, "is-hud-hover");
+    overlay.el.classList.add("is-open");
+    if (kind === "music") closeMusicDetail(true);
     requestAnimationFrame(() => {
-      overlay.el.classList.add("is-open");
-      requestAnimationFrame(() => syncArchiveCopySize(overlay.grid));
+      clampArchiveTagLists(overlay.grid);
+      syncArchiveCopySize(overlay.grid);
     });
     setExpanded(kind, true);
     openKind = kind;
@@ -154,14 +545,21 @@
   function closeArchive() {
     if (!openKind) return;
     const kind = openKind;
-    hideOverlay(kind, false);
-    document.body.classList.remove("is-archive-open");
     openKind = null;
+    closeMusicDetail(true);
+    hideOverlay(kind, false);
   }
 
   function toggleArchive(kind) {
-    if (openKind === kind) closeArchive();
-    else openArchive(kind);
+    if (openKind === kind) {
+      if (kind === "music" && musicArchive?.classList.contains("is-detail-open")) {
+        closeMusicDetail();
+        return;
+      }
+      closeArchive();
+    } else {
+      openArchive(kind);
+    }
   }
 
   Object.keys(overlays).forEach((kind) => {
@@ -174,7 +572,18 @@
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && openKind) closeArchive();
+    if (event.key !== "Escape" || !openKind) return;
+    if (musicArchive?.classList.contains("is-detail-open")) {
+      closeMusicDetail();
+      return;
+    }
+    closeArchive();
+  });
+
+  musicDetail?.addEventListener("click", (event) => {
+    const nav = event.target.closest("[data-photo-step]");
+    if (!nav) return;
+    stepMusicPhoto(Number(nav.dataset.photoStep));
   });
 
   if (video) {
@@ -469,10 +878,35 @@
     setFocusVisible(false);
   }
 
+  function initArchiveLang() {
+    document.querySelectorAll(".archive-col-copy").forEach((copy) => {
+      const group = copy.querySelector(".archive-lang");
+      if (!group) return;
+
+      group.addEventListener("click", (event) => {
+        const btn = event.target.closest(".archive-lang-btn");
+        if (!btn || !copy.contains(btn)) return;
+
+        const lang = btn.dataset.lang;
+        if (lang !== "en" && lang !== "kr") return;
+
+        copy.dataset.lang = lang;
+        copy.querySelectorAll(".archive-lang-btn").forEach((el) => {
+          const on = el.dataset.lang === lang;
+          el.classList.toggle("is-active", on);
+          el.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+      });
+    });
+  }
+
   renderCards(archiveGrid, overlays.travel.items());
   renderCards(musicArchiveGrid, overlays.music.items());
+  renderDotTitles();
+  initArchiveLang();
   const onArchiveResize = () => {
     const grid = openKind ? overlays[openKind].grid : archiveGrid;
+    clampArchiveTagLists(grid);
     syncArchiveCopySize(grid);
   };
   if (archiveGrid) new ResizeObserver(onArchiveResize).observe(archiveGrid);
