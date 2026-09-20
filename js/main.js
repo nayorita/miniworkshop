@@ -4,6 +4,7 @@
   const musicArchive = document.getElementById("music-archive");
   const musicArchiveGrid = document.getElementById("music-archive-grid");
   const musicDetail = document.getElementById("music-detail");
+  const travelDetail = document.getElementById("travel-detail");
   const video = document.getElementById("bg-video");
   const sharpVideo = document.getElementById("bg-video-sharp");
   const sharpPortal = document.getElementById("video-sharp-portal");
@@ -105,22 +106,29 @@
     });
     clampArchiveTagLists(grid);
     bindArchiveTagExpand(grid);
-    if (grid === musicArchiveGrid) bindMusicCardOpen(grid);
+    if (grid === musicArchiveGrid) bindArchiveCardOpen(grid, "music");
+    if (grid === archiveGrid) bindArchiveCardOpen(grid, "travel");
     syncArchiveCopySize(grid);
   }
 
-  function musicDetailFrom(item) {
+  function archiveDetailFrom(item, kind) {
     const detail = item.detail || {};
     const tags = Array.isArray(detail.tags) && detail.tags.length
       ? detail.tags
       : tagsFrom(item);
     const rows = Array.isArray(detail.rows) && detail.rows.length
       ? detail.rows
-      : [
-          { label: "공연명", value: item.caption || item.title || "" },
-          { label: "공연 일시", value: item.date || "" },
-          { label: "공연 장소", value: item.location || "" },
-        ];
+      : kind === "travel"
+        ? [
+            { label: "여행명", value: item.caption || item.title || "" },
+            { label: "여행 기간", value: item.date || "" },
+            { label: "경로", value: item.location || "" },
+          ]
+        : [
+            { label: "공연명", value: item.caption || item.title || "" },
+            { label: "공연 일시", value: item.date || "" },
+            { label: "공연 장소", value: item.location || "" },
+          ];
     const images = (Array.isArray(detail.images) && detail.images.length
       ? detail.images
       : [detail.image || item.image || ""]
@@ -128,7 +136,7 @@
       .map((path) => resolveArchiveImage(path))
       .filter(Boolean);
     return {
-      title: item.title || "",
+      title: detail.title || item.title || "",
       titleSvg: detail.titleSvg || "",
       rows,
       body: detail.body || item.caption || "",
@@ -159,9 +167,36 @@
     });
   }
 
-  function renderMusicDetail(item) {
-    if (!musicDetail || !item) return;
-    const data = musicDetailFrom(item);
+  function getDetailView(kind) {
+    return kind === "travel"
+      ? {
+          kind: "travel",
+          root: archive,
+          grid: archiveGrid,
+          panel: travelDetail,
+          items: overlays.travel.items,
+          bodyClass: "is-travel-detail-open",
+        }
+      : {
+          kind: "music",
+          root: musicArchive,
+          grid: musicArchiveGrid,
+          panel: musicDetail,
+          items: overlays.music.items,
+          bodyClass: "is-music-detail-open",
+        };
+  }
+
+  function openDetailKind() {
+    if (archive?.classList.contains("is-detail-open")) return "travel";
+    if (musicArchive?.classList.contains("is-detail-open")) return "music";
+    return null;
+  }
+
+  function renderArchiveDetail(item, kind) {
+    const view = getDetailView(kind);
+    if (!view.panel || !item) return;
+    const data = archiveDetailFrom(item, kind);
     const title = data.title
       ? dotTitleHtml(data.title)
       : `<span class="music-detail-title-text">${escapeHtml(data.title)}</span>`;
@@ -174,7 +209,7 @@
     const tags = data.tags
       .map((tag) => `<li>${escapeHtml(tag)}</li>`)
       .join("");
-    musicDetail.innerHTML = `
+    view.panel.innerHTML = `
       <div class="music-detail-copy">
         <h2 class="music-detail-title" aria-label="${escapeHtml(data.title)}">${title}</h2>
         <dl class="music-detail-meta">${rows}</dl>
@@ -217,14 +252,15 @@
     el.style.height = `${rect.height}px`;
   }
 
-  function playMusicHero(srcUrl, fromRect, getToRect, onDone) {
+  function playMusicHero(srcUrl, fromRect, getToRect, onDone, chrome, mode) {
     clearMusicFly();
     const frame = document.createElement("div");
-    frame.className = "music-fly-frame";
+    frame.className = `music-fly-frame ${mode === "close" ? "is-close-fly" : "is-open-fly"}`;
     const img = document.createElement("img");
     img.alt = "";
     img.src = srcUrl;
     frame.appendChild(img);
+    if (chrome) frame.appendChild(chrome);
     placeMusicRect(frame, fromRect);
     document.body.appendChild(frame);
     musicFlyEl = frame;
@@ -258,137 +294,168 @@
     window.setTimeout(finish, 720);
   }
 
-  function showMusicDetail(item) {
-    renderMusicDetail(item);
-    musicDetail.hidden = false;
-    musicDetail.dataset.id = item.id || "";
-    musicDetail.dataset.photo = "0";
-    musicArchive.classList.add("is-detail-open");
-    musicArchive.classList.remove("is-opening-detail", "is-detail-ready");
-    document.body.classList.add("is-music-detail-open");
+  function showArchiveDetail(item, kind) {
+    const view = getDetailView(kind);
+    renderArchiveDetail(item, kind);
+    view.panel.hidden = false;
+    view.panel.dataset.id = item.id || "";
+    view.panel.dataset.photo = "0";
+    view.root.classList.add("is-detail-open");
+    view.root.classList.remove("is-opening-detail", "is-detail-ready");
+    document.body.classList.add(view.bodyClass);
   }
 
-  function resetMusicOpenCards() {
-    musicArchiveGrid?.querySelectorAll(".archive-card").forEach((el) => {
+  function resetOpenCards(kind) {
+    getDetailView(kind).grid?.querySelectorAll(".archive-card").forEach((el) => {
       el.classList.remove("is-pushed", "is-opening", "is-returning");
       el.style.removeProperty("--push-x");
       el.style.removeProperty("--push-y");
     });
   }
 
-  function playMusicOpen(item, card) {
+  function playArchiveOpen(item, card, kind) {
+    const view = getDetailView(kind);
     musicOpenLock = true;
     lastMusicCard = card;
     const source = card.querySelector(".archive-card-photo img") || card;
     const sr = source.getBoundingClientRect();
-    const srcUrl = source.currentSrc || source.src || musicDetailFrom(item).images[0] || "";
+    const srcUrl = source.currentSrc || source.src || archiveDetailFrom(item, kind).images[0] || "";
 
-    renderMusicDetail(item);
-    musicDetail.hidden = false;
-    musicDetail.dataset.id = item.id || "";
-    musicDetail.dataset.photo = "0";
-    musicArchive.classList.add("is-detail-open", "is-opening-detail");
-    document.body.classList.add("is-music-detail-open");
+    renderArchiveDetail(item, kind);
+    view.panel.hidden = false;
+    view.panel.dataset.id = item.id || "";
+    view.panel.dataset.photo = "0";
+    view.root.classList.add("is-detail-open", "is-opening-detail");
+    document.body.classList.add(view.bodyClass);
     card.classList.add("is-opening");
 
-    const dest = musicDetail.querySelector(".music-detail-photo");
-    playMusicHero(srcUrl, sr, () => dest?.getBoundingClientRect(), () => {
-      musicArchive.classList.add("is-detail-ready");
-      window.setTimeout(() => {
+    const dest = view.panel.querySelector(".music-detail-photo");
+    const destImg = dest?.querySelector("img");
+    if (destImg && srcUrl) destImg.src = srcUrl;
+    const navs = dest?.querySelector(".music-detail-navs");
+    playMusicHero(
+      srcUrl,
+      sr,
+      () => dest?.getBoundingClientRect(),
+      () => {
         clearMusicFly();
-        musicArchive.classList.remove("is-opening-detail", "is-detail-ready");
-        resetMusicOpenCards();
+        view.root.classList.remove("is-opening-detail", "is-detail-ready");
+        resetOpenCards(kind);
         musicOpenLock = false;
-      }, 160);
-    });
+      },
+      navs ? navs.cloneNode(true) : null,
+      "open"
+    );
   }
 
-  function openMusicDetail(item, card) {
-    if (!musicArchive || !item || musicOpenLock) return;
+  function openArchiveDetail(item, card, kind) {
+    const view = getDetailView(kind);
+    if (!view.root || !item || musicOpenLock) return;
     if (card && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      playMusicOpen(item, card);
+      playArchiveOpen(item, card, kind);
       return;
     }
-    showMusicDetail(item);
+    showArchiveDetail(item, kind);
   }
 
-  function stepMusicPhoto(step) {
-    const item = overlays.music.items().find((entry) => entry.id === musicDetail?.dataset.id);
+  function stepArchivePhoto(step) {
+    const kind = openDetailKind();
+    if (!kind) return;
+    const view = getDetailView(kind);
+    const item = view.items().find((entry) => entry.id === view.panel?.dataset.id);
     if (!item) return;
-    const images = musicDetailFrom(item).images;
+    const images = archiveDetailFrom(item, kind).images;
     if (images.length < 2) return;
-    const index = Number(musicDetail.dataset.photo || 0);
+    const index = Number(view.panel.dataset.photo || 0);
     const next = (index + step + images.length) % images.length;
-    musicDetail.dataset.photo = String(next);
-    const photo = musicDetail.querySelector(".music-detail-photo > img");
+    view.panel.dataset.photo = String(next);
+    const photo = view.panel.querySelector(".music-detail-photo > img");
     if (photo) photo.src = images[next];
   }
 
-  function finishCloseMusicDetail() {
+  function finishCloseArchiveDetail() {
+    const kind = openDetailKind() || "music";
+    const view = getDetailView(kind);
     clearMusicFly();
-    resetMusicOpenCards();
+    resetOpenCards(kind);
     musicOpenLock = false;
     lastMusicCard = null;
-    musicArchive?.classList.remove(
+    view.root?.classList.remove(
       "is-detail-open",
       "is-opening-detail",
       "is-closing-detail",
       "is-closing-prep",
       "is-detail-ready"
     );
-    document.body.classList.remove("is-music-detail-open");
-    if (musicDetail) {
-      musicDetail.hidden = true;
-      musicDetail.innerHTML = "";
+    document.body.classList.remove("is-music-detail-open", "is-travel-detail-open");
+    if (view.panel) {
+      view.panel.hidden = true;
+      view.panel.innerHTML = "";
     }
   }
 
-  function playMusicClose() {
-    const id = musicDetail?.dataset.id || "";
+  function playArchiveClose() {
+    const kind = openDetailKind();
+    if (!kind) {
+      finishCloseArchiveDetail();
+      return;
+    }
+    const view = getDetailView(kind);
+    const id = view.panel?.dataset.id || "";
     const card =
       lastMusicCard ||
-      musicArchiveGrid?.querySelector(`.archive-card[data-id="${id}"]`);
+      view.grid?.querySelector(`.archive-card[data-id="${id}"]`);
     if (!card) {
-      finishCloseMusicDetail();
+      finishCloseArchiveDetail();
       return;
     }
 
     musicOpenLock = true;
-    document.body.classList.remove("is-music-detail-open");
+    document.body.classList.remove(view.bodyClass);
 
-    const dest = musicDetail.querySelector(".music-detail-photo");
+    const dest = view.panel.querySelector(".music-detail-photo");
     const destImg = dest?.querySelector("img");
-    const photo = card.querySelector(".archive-card-photo") || card;
+    const cardImg =
+      card.querySelector(".archive-card-photo img") ||
+      card.querySelector(".archive-card-photo") ||
+      card;
     const dr = dest?.getBoundingClientRect();
-    const sr = photo.getBoundingClientRect();
-    const srcUrl = destImg?.currentSrc || destImg?.src || photo.querySelector("img")?.src || "";
+    const srcUrl = destImg?.currentSrc || destImg?.src || cardImg.src || "";
 
     card.classList.add("is-returning");
-    playMusicHero(srcUrl, dr || sr, () => sr, () => {
-      finishCloseMusicDetail();
-    });
-    musicArchive.classList.add("is-closing-detail");
+    view.root.classList.add("is-closing-detail");
+    const navs = dest?.querySelector(".music-detail-navs");
+    playMusicHero(
+      srcUrl,
+      dr || cardImg.getBoundingClientRect(),
+      () => cardImg.getBoundingClientRect(),
+      () => {
+        finishCloseArchiveDetail();
+      },
+      navs ? navs.cloneNode(true) : null,
+      "close"
+    );
   }
 
   function closeMusicDetail(immediate) {
-    if (!musicArchive?.classList.contains("is-detail-open")) return;
+    if (!openDetailKind()) return;
     if (musicOpenLock && !immediate) return;
     if (immediate || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      finishCloseMusicDetail();
+      finishCloseArchiveDetail();
       return;
     }
-    playMusicClose();
+    playArchiveClose();
   }
 
-  function bindMusicCardOpen(grid) {
-    if (!grid || grid.dataset.musicDetailBound) return;
-    grid.dataset.musicDetailBound = "true";
+  function bindArchiveCardOpen(grid, kind) {
+    if (!grid || grid.dataset.archiveDetailBound) return;
+    grid.dataset.archiveDetailBound = "true";
     grid.addEventListener("click", (event) => {
       if (event.target.closest(".archive-card-tags-more")) return;
       const card = event.target.closest(".archive-card");
       if (!card) return;
-      const item = overlays.music.items().find((entry) => entry.id === card.dataset.id);
-      if (item) openMusicDetail(item, card);
+      const item = overlays[kind].items().find((entry) => entry.id === card.dataset.id);
+      if (item) openArchiveDetail(item, card, kind);
     });
     grid.addEventListener("keydown", (event) => {
       if (event.key !== "Enter" && event.key !== " ") return;
@@ -396,8 +463,8 @@
       const card = event.target.closest(".archive-card");
       if (!card) return;
       event.preventDefault();
-      const item = overlays.music.items().find((entry) => entry.id === card.dataset.id);
-      if (item) openMusicDetail(item, card);
+      const item = overlays[kind].items().find((entry) => entry.id === card.dataset.id);
+      if (item) openArchiveDetail(item, card, kind);
     });
   }
 
@@ -504,12 +571,12 @@
     if (!overlay?.el) return;
     overlay.el.classList.remove("is-open");
     overlay.el.inert = true;
-    if (kind === "music") closeMusicDetail(true);
+    closeMusicDetail(true);
     document.body.classList.remove(overlay.bodyClass);
+    if (!openKind) document.body.classList.remove("is-archive-open");
     setExpanded(kind, false);
     if (immediate) {
       overlay.el.hidden = true;
-      if (!openKind) document.body.classList.remove("is-archive-open");
       return;
     }
     const onEnd = (event) => {
@@ -517,7 +584,6 @@
       overlay.el.removeEventListener("transitionend", onEnd);
       if (!overlay.el.classList.contains("is-open")) {
         overlay.el.hidden = true;
-        if (!openKind) document.body.classList.remove("is-archive-open");
       }
     };
     overlay.el.addEventListener("transitionend", onEnd);
@@ -533,7 +599,7 @@
     void overlay.el.offsetWidth;
     document.body.classList.add("is-archive-open", overlay.bodyClass, "is-hud-hover");
     overlay.el.classList.add("is-open");
-    if (kind === "music") closeMusicDetail(true);
+    closeMusicDetail(true);
     requestAnimationFrame(() => {
       clampArchiveTagLists(overlay.grid);
       syncArchiveCopySize(overlay.grid);
@@ -552,7 +618,7 @@
 
   function toggleArchive(kind) {
     if (openKind === kind) {
-      if (kind === "music" && musicArchive?.classList.contains("is-detail-open")) {
+      if (overlays[kind].el.classList.contains("is-detail-open")) {
         closeMusicDetail();
         return;
       }
@@ -573,17 +639,19 @@
 
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape" || !openKind) return;
-    if (musicArchive?.classList.contains("is-detail-open")) {
+    if (openDetailKind()) {
       closeMusicDetail();
       return;
     }
     closeArchive();
   });
 
-  musicDetail?.addEventListener("click", (event) => {
-    const nav = event.target.closest("[data-photo-step]");
-    if (!nav) return;
-    stepMusicPhoto(Number(nav.dataset.photoStep));
+  [musicDetail, travelDetail].forEach((panel) => {
+    panel?.addEventListener("click", (event) => {
+      const nav = event.target.closest("[data-photo-step]");
+      if (!nav) return;
+      stepArchivePhoto(Number(nav.dataset.photoStep));
+    });
   });
 
   if (video) {
@@ -878,32 +946,96 @@
     setFocusVisible(false);
   }
 
+  function setArchiveCopyLang(copy, lang) {
+    copy.dataset.lang = lang;
+    copy.querySelectorAll(".archive-lang-btn").forEach((el) => {
+      const on = el.dataset.lang === lang;
+      el.classList.toggle("is-active", on);
+      el.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    const title = copy.querySelector(".archive-title");
+    if (!title) return;
+    const en = title.dataset.titleEn || title.dataset.dotTitle || "";
+    const kr = title.dataset.titleKr || "";
+    const label = lang === "kr" && /[a-z]/i.test(kr) ? kr : en;
+    title.classList.remove("is-plain");
+    title.dataset.dotTitle = label;
+    title.setAttribute("aria-label", label);
+    title.innerHTML = dotTitleHtml(label);
+  }
+
+  function applyArchivePage(copy, page) {
+    if (!copy || !page) return;
+    const title = copy.querySelector(".archive-title");
+    const body = copy.querySelector(".archive-body");
+    const coda = copy.querySelector(".archive-coda");
+    if (title) {
+      if (page.titleEn) title.dataset.titleEn = page.titleEn;
+      if (page.titleKr) title.dataset.titleKr = page.titleKr;
+    }
+    if (body && page.bodyEn) body.textContent = page.bodyEn;
+    if (coda && page.bodyKr) coda.textContent = page.bodyKr;
+    setArchiveCopyLang(copy, copy.dataset.lang || "en");
+  }
+
   function initArchiveLang() {
     document.querySelectorAll(".archive-col-copy").forEach((copy) => {
+      const title = copy.querySelector(".archive-title");
+      if (title && !title.dataset.titleEn) {
+        title.dataset.titleEn = title.dataset.dotTitle || "";
+      }
       const group = copy.querySelector(".archive-lang");
       if (!group) return;
 
       group.addEventListener("click", (event) => {
         const btn = event.target.closest(".archive-lang-btn");
         if (!btn || !copy.contains(btn)) return;
-
-        const lang = btn.dataset.lang;
-        if (lang !== "en" && lang !== "kr") return;
-
-        copy.dataset.lang = lang;
-        copy.querySelectorAll(".archive-lang-btn").forEach((el) => {
-          const on = el.dataset.lang === lang;
-          el.classList.toggle("is-active", on);
-          el.setAttribute("aria-pressed", on ? "true" : "false");
-        });
+        setArchiveCopyLang(copy, copy.dataset.lang === "kr" ? "en" : "kr");
       });
     });
   }
 
-  renderCards(archiveGrid, overlays.travel.items());
-  renderCards(musicArchiveGrid, overlays.music.items());
+  function mergeArchiveItems(localItems, sanityItems) {
+    const byId = new Map((localItems || []).map((item) => [item.id, item]));
+    (sanityItems || []).forEach((item) => byId.set(item.id, item));
+    return Array.from(byId.values());
+  }
+
+  function renderLocalArchives() {
+    renderCards(archiveGrid, overlays.travel.items());
+    renderCards(musicArchiveGrid, overlays.music.items());
+  }
+
+  renderLocalArchives();
+  if (typeof window.loadTravelArchive === "function") {
+    window
+      .loadTravelArchive()
+      .then((items) => {
+        window.archiveItems = mergeArchiveItems(window.archiveItems, items);
+        renderCards(archiveGrid, window.archiveItems);
+      })
+      .catch(() => {});
+  }
+  if (typeof window.loadMusicArchive === "function") {
+    window
+      .loadMusicArchive()
+      .then((items) => {
+        window.musicItems = mergeArchiveItems(window.musicItems, items);
+        renderCards(musicArchiveGrid, window.musicItems);
+      })
+      .catch(() => {});
+  }
   renderDotTitles();
   initArchiveLang();
+  if (typeof window.loadArchivePages === "function") {
+    window
+      .loadArchivePages()
+      .then((pages) => {
+        applyArchivePage(archive?.querySelector(".archive-col-copy"), pages.travel);
+        applyArchivePage(musicArchive?.querySelector(".archive-col-copy"), pages.music);
+      })
+      .catch(() => {});
+  }
   const onArchiveResize = () => {
     const grid = openKind ? overlays[openKind].grid : archiveGrid;
     clampArchiveTagLists(grid);

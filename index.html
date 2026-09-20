@@ -68,6 +68,7 @@
             >
               <img class="auto-wb-default" src="assets/icons/auto-wb.png" width="206" height="150" alt="" />
               <img class="auto-wb-hover" src="assets/icons/auto-wb-hover.png" width="197" height="150" alt="" />
+              <img class="focus-detail" src="assets/icons/focus-detail.png" width="149" height="150" alt="" />
             </button>
           </div>
 
@@ -176,16 +177,17 @@
       inert
     >
       <div class="archive-shell">
+        <div class="archive-stage">
         <div class="archive-scroll">
           <div class="archive-col archive-col-copy" data-lang="en">
             <div class="archive-heading">
               <h2 class="archive-title" id="archive-title" data-dot-title="TRAVEL ARCHIVE"></h2>
               <div class="archive-lang">
-                <button type="button" class="archive-lang-btn is-active" data-lang="en" aria-pressed="true" aria-label="English">
+                <button type="button" class="archive-lang-btn is-active" data-lang="en" aria-pressed="true" aria-label="Switch to 한국어">
                   <img class="archive-lang-default" src="assets/icons/tag-en.png" width="183" height="150" alt="" />
                   <img class="archive-lang-hover" src="assets/icons/tag-en-hover.png" width="184" height="150" alt="" />
                 </button>
-                <button type="button" class="archive-lang-btn" data-lang="kr" aria-pressed="false" aria-label="한국어">
+                <button type="button" class="archive-lang-btn" data-lang="kr" aria-pressed="false" aria-label="Switch to English">
                   <img class="archive-lang-default" src="assets/icons/tag-kr.png" width="184" height="150" alt="" />
                   <img class="archive-lang-hover" src="assets/icons/tag-kr-hover.png" width="184" height="150" alt="" />
                 </button>
@@ -206,6 +208,8 @@
             <div class="archive-grid" id="archive-grid"></div>
           </div>
         </div>
+        <div class="music-detail" id="travel-detail" hidden></div>
+        </div>
       </div>
     </aside>
 
@@ -225,11 +229,11 @@
             <div class="archive-heading">
               <h2 class="archive-title" id="music-archive-title" data-dot-title="MUSIC ARCHIVE"></h2>
               <div class="archive-lang">
-                <button type="button" class="archive-lang-btn is-active" data-lang="en" aria-pressed="true" aria-label="English">
+                <button type="button" class="archive-lang-btn is-active" data-lang="en" aria-pressed="true" aria-label="Switch to 한국어">
                   <img class="archive-lang-default" src="assets/icons/tag-en.png" width="183" height="150" alt="" />
                   <img class="archive-lang-hover" src="assets/icons/tag-en-hover.png" width="184" height="150" alt="" />
                 </button>
-                <button type="button" class="archive-lang-btn" data-lang="kr" aria-pressed="false" aria-label="한국어">
+                <button type="button" class="archive-lang-btn" data-lang="kr" aria-pressed="false" aria-label="Switch to English">
                   <img class="archive-lang-default" src="assets/icons/tag-kr.png" width="184" height="150" alt="" />
                   <img class="archive-lang-hover" src="assets/icons/tag-kr-hover.png" width="184" height="150" alt="" />
                 </button>
@@ -253,6 +257,7 @@
 
     <script src="js/archiveItems.js"></script>
     <script src="js/musicItems.js"></script>
+    <script src="js/loadSanityArchives.js"></script>
     <script src="js/main.js"></script>
   </body>
 </html>

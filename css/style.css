@@ -24,6 +24,7 @@
   --hud-top-gap: 116.6px;
   --hud-bottom-gap: 233.19px;
   --hud-icon-h: 36.6px;
+  --hud-close-h: 32.2px;
   --hud-icon-h-hover: 43.28px;
   --tc-h: 16.15px;
   --tc-w: calc(var(--tc-h) * 300 / 46);
@@ -31,6 +32,8 @@
   --tc-w-hover: calc(var(--tc-w) * 300 / 282);
   --tc-h-hover: calc(var(--tc-w-hover) * 62 / 300);
   --scrim-edge: 0.12;
+  --archive-top: calc(var(--grid-margin) + var(--hud-icon-h) + var(--grid-gutter));
+  --archive-bottom: var(--archive-top);
 }
 
 *,
@@ -378,6 +381,12 @@ body.is-archive-open .layer-video::after {
   visibility: hidden;
 }
 
+.hud-btn.music-trigger .focus-detail {
+  left: 0;
+  height: var(--hud-close-h);
+  transform: translateY(-50%);
+}
+
 .hud-btn.music-trigger:hover .focus-default {
   visibility: hidden;
 }
@@ -426,7 +435,8 @@ body.is-archive-open .layer-video::after {
   filter: none;
 }
 
-.hud-btn.archive-trigger .auto-wb-hover {
+.hud-btn.archive-trigger .auto-wb-hover,
+.hud-btn.archive-trigger .focus-detail {
   position: absolute;
   left: 50%;
   top: 50%;
@@ -437,6 +447,12 @@ body.is-archive-open .layer-video::after {
   mix-blend-mode: screen;
   transform: translate(-50%, -50%);
   visibility: hidden;
+}
+
+.hud-btn.archive-trigger .focus-detail {
+  left: 0;
+  height: var(--hud-close-h);
+  transform: translateY(-50%);
 }
 
 .hud-btn.archive-trigger:hover .auto-wb-default {
@@ -820,7 +836,7 @@ svg.hud-hover-white:hover {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: calc(var(--grid-margin) + var(--hud-icon-h) + var(--grid-gutter)) var(--grid-margin) var(--grid-margin);
+  padding: 0 var(--grid-margin);
   overflow: hidden;
 }
 
@@ -845,6 +861,20 @@ svg.hud-hover-white:hover {
   scrollbar-width: none;
   -ms-overflow-style: none;
   container-type: size;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--archive-top),
+    #000 calc(100% - var(--archive-bottom)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--archive-top),
+    #000 calc(100% - var(--archive-bottom)),
+    transparent 100%
+  );
 }
 
 .archive-scroll::-webkit-scrollbar {
@@ -853,18 +883,19 @@ svg.hud-hover-white:hover {
 
 .archive-col-copy {
   position: sticky;
-  top: 0;
+  top: var(--archive-top);
   align-self: start;
   z-index: 1;
   min-width: 0;
-  height: 100cqh;
+  margin-top: var(--archive-top);
+  height: calc(100cqh - var(--archive-top) - var(--grid-margin));
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   padding-top: 12px;
   overflow: visible;
   pointer-events: none;
-  color: var(--hud-icon);
+  color: #ffffff;
 }
 
 #archive.is-open .archive-col-copy,
@@ -916,9 +947,9 @@ svg.hud-hover-white:hover {
   flex: 0 0 auto;
   pointer-events: none;
   user-select: none;
-  mix-blend-mode: screen;
-  filter: none;
-  opacity: 0.7;
+  mix-blend-mode: normal;
+  filter: brightness(0) invert(1);
+  opacity: 1;
 }
 
 .dot-title-space {
@@ -938,36 +969,35 @@ svg.hud-hover-white:hover {
 }
 
 .archive-lang-btn {
+  --lang-tag-h: calc(var(--hud-icon-h) * 11 / 14);
+  --lang-tag-w: calc(var(--lang-tag-h) * 184 / 150);
   position: relative;
   display: block;
   padding: 0;
   line-height: 0;
+  width: var(--lang-tag-w);
+  height: var(--lang-tag-h);
 }
 
 .archive-lang img {
   display: block;
-  height: calc(var(--hud-icon-h) * 11 / 14);
-  width: auto;
-  mix-blend-mode: screen;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  mix-blend-mode: normal;
+  filter: brightness(0) invert(1);
   pointer-events: none;
   user-select: none;
 }
 
 .archive-lang-hover {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.archive-lang-btn.is-active .archive-lang-default,
-.archive-lang-btn:not(.is-active) .archive-lang-hover {
+  inset: 0;
   visibility: hidden;
 }
 
-.archive-lang-btn.is-active .archive-lang-hover,
-.archive-lang-btn:not(.is-active) .archive-lang-default {
-  visibility: visible;
+.archive-lang-btn:not(.is-active) {
+  display: none;
 }
 
 .archive-heading + .archive-body,
@@ -1008,7 +1038,7 @@ svg.hud-hover-white:hover {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   column-gap: 20px;
   row-gap: 26px;
-  padding: 12px 12px 2rem;
+  padding: calc(var(--archive-top) + 12px) 12px calc(var(--archive-bottom) + 2rem);
 }
 
 .archive-coda {
@@ -1290,40 +1320,50 @@ svg.hud-hover-white:hover {
   display: grid;
 }
 
+#archive-grid .archive-card,
 #music-archive-grid .archive-card {
   cursor: pointer;
   pointer-events: auto;
 }
 
+#archive.is-detail-open:not(.is-closing-detail) .archive-lang,
 #music-archive.is-detail-open:not(.is-closing-detail) .archive-lang {
   display: none;
 }
 
+#archive.is-detail-open:not(.is-closing-detail) .archive-scroll,
 #music-archive.is-detail-open:not(.is-closing-detail) .archive-scroll {
   visibility: hidden;
   pointer-events: none;
 }
 
+#archive.is-opening-detail .archive-scroll,
 #music-archive.is-opening-detail .archive-scroll,
+#archive.is-closing-detail .archive-scroll,
 #music-archive.is-closing-detail .archive-scroll {
   overflow: hidden;
   pointer-events: none;
 }
 
+#archive.is-opening-detail .archive-col-copy,
 #music-archive.is-opening-detail .archive-col-copy {
   opacity: 0;
   transition: opacity 0.45s var(--ease-out);
 }
 
+#archive.is-closing-detail .archive-col-copy,
 #music-archive.is-closing-detail .archive-col-copy {
   animation: music-detail-copy-in 0.45s var(--ease-out) both;
 }
 
+#archive.is-opening-detail .archive-card.is-opening .archive-card-photo img,
 #music-archive.is-opening-detail .archive-card.is-opening .archive-card-photo img,
+#archive.is-closing-detail .archive-card.is-returning .archive-card-photo img,
 #music-archive.is-closing-detail .archive-card.is-returning .archive-card-photo img {
   visibility: hidden;
 }
 
+#archive.is-closing-detail .music-detail,
 #music-archive.is-closing-detail .music-detail {
   pointer-events: none;
 }
@@ -1361,7 +1401,27 @@ svg.hud-hover-white:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center bottom;
+}
+
+.music-fly-frame::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 42%;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.62) 0%,
+    rgba(0, 0, 0, 0.28) 45%,
+    transparent 100%
+  );
+}
+
+.music-fly-frame .music-detail-navs {
+  z-index: 1;
+  opacity: 0;
 }
 
 .music-fly-frame.is-flying {
@@ -1372,44 +1432,59 @@ svg.hud-hover-white:hover {
     height 0.52s var(--ease-apple);
 }
 
+.music-fly-frame.is-open-fly.is-flying::after,
+.music-fly-frame.is-open-fly.is-flying .music-detail-navs,
+.music-fly-frame.is-close-fly:not(.is-flying)::after,
+.music-fly-frame.is-close-fly:not(.is-flying) .music-detail-navs {
+  opacity: 1;
+}
+
+.music-fly-frame.is-open-fly.is-flying::after,
+.music-fly-frame.is-open-fly.is-flying .music-detail-navs,
+.music-fly-frame.is-close-fly.is-flying::after,
+.music-fly-frame.is-close-fly.is-flying .music-detail-navs {
+  transition: opacity 0.52s var(--ease-apple);
+}
+
 .music-detail {
   display: none;
   position: absolute;
   inset: 0;
+  z-index: 4;
   min-height: 0;
   grid-template-columns: 1fr 2fr;
   gap: var(--grid-gutter);
   align-items: start;
-  padding-top: 12px;
-  color: var(--hud-icon);
+  padding-top: calc(var(--archive-top) + 12px);
+  padding-bottom: var(--grid-margin);
+  color: #ffffff;
 }
 
+#archive.is-opening-detail .music-detail-copy,
 #music-archive.is-opening-detail .music-detail-copy {
   animation: music-detail-copy-in 0.28s var(--ease-out) both;
 }
 
+#archive.is-closing-detail .music-detail-copy,
 #music-archive.is-closing-detail .music-detail-copy {
   animation: music-detail-copy-out 0.28s var(--ease-out) both;
 }
 
-#music-archive.is-opening-detail .music-detail-photo > img,
-#music-archive.is-opening-detail .music-detail-photo::after {
-  opacity: 0;
+#archive.is-opening-detail .music-detail-photo,
+#music-archive.is-opening-detail .music-detail-photo {
+  background: transparent;
+  visibility: hidden;
 }
 
+#archive.is-opening-detail .music-detail-tags,
 #music-archive.is-opening-detail .music-detail-tags {
   animation: music-detail-copy-in 0.28s var(--ease-out) both;
 }
 
+#archive.is-closing-detail .music-detail-media,
 #music-archive.is-closing-detail .music-detail-media {
   opacity: 0;
   transition: opacity 0.32s var(--ease-out);
-}
-
-#music-archive.is-opening-detail.is-detail-ready .music-detail-photo > img,
-#music-archive.is-opening-detail.is-detail-ready .music-detail-photo::after {
-  opacity: 1;
-  transition: opacity 0.22s ease;
 }
 
 @keyframes music-detail-copy-in {
@@ -1422,6 +1497,7 @@ svg.hud-hover-white:hover {
   to { opacity: 0; }
 }
 
+#archive.is-detail-open .music-detail,
 #music-archive.is-detail-open .music-detail {
   display: grid;
 }
@@ -1433,6 +1509,7 @@ svg.hud-hover-white:hover {
 
 .music-detail-title-text {
   display: block;
+  color: #ffffff;
   font-family: var(--font-mono);
   font-size: 28px;
   font-weight: 400;
@@ -1462,7 +1539,8 @@ svg.hud-hover-white:hover {
 .music-detail-meta dt {
   margin: 0;
   font-weight: 400;
-  opacity: 0.72;
+  color: #ffffff;
+  opacity: 1;
 }
 
 .music-detail-meta dd {
@@ -1480,6 +1558,7 @@ svg.hud-hover-white:hover {
   word-break: keep-all;
   overflow-wrap: break-word;
   line-break: loose;
+  color: var(--hud-icon);
   opacity: 0.88;
 }
 
@@ -1513,7 +1592,7 @@ svg.hud-hover-white:hover {
   height: auto;
   aspect-ratio: 455 / 245;
   object-fit: cover;
-  object-position: center;
+  object-position: center bottom;
 }
 
 .music-detail-navs {
@@ -1607,6 +1686,17 @@ body.is-music-detail-open .hud-btn.music-trigger:hover .focus-hover {
 
 body.is-music-detail-open .hud-btn.music-trigger .focus-detail,
 body.is-music-detail-open .hud-btn.music-trigger:hover .focus-detail {
+  visibility: visible;
+}
+
+body.is-travel-detail-open .hud-btn.archive-trigger .auto-wb-default,
+body.is-travel-detail-open .hud-btn.archive-trigger .auto-wb-hover,
+body.is-travel-detail-open .hud-btn.archive-trigger:hover .auto-wb-hover {
+  visibility: hidden;
+}
+
+body.is-travel-detail-open .hud-btn.archive-trigger .focus-detail,
+body.is-travel-detail-open .hud-btn.archive-trigger:hover .focus-detail {
   visibility: visible;
 }
 
