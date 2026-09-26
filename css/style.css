@@ -463,6 +463,27 @@ body.is-archive-open .layer-video::after {
   visibility: visible;
 }
 
+.hud-icon-label {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 20px);
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: var(--hud-icon);
+  mix-blend-mode: screen;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+body.is-archive-open .hud-icon-label {
+  display: none;
+}
+
 /* asset 12 — elapsed timecode */
 .hud-icon.hud-icon-rec {
   height: var(--tc-h);
@@ -723,7 +744,7 @@ svg.hud-hover-white:hover {
   flex-direction: column;
   align-items: flex-start;
   color: var(--hud-icon);
-  font-size: var(--archive-copy-size, 13px);
+  font-size: 13px;
   line-height: 1.2;
   letter-spacing: 0.04em;
   text-transform: none;
@@ -737,7 +758,7 @@ svg.hud-hover-white:hover {
   display: flex;
   align-items: baseline;
   gap: 0.45em;
-  font-size: var(--archive-copy-size, 13px);
+  font-size: 13px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
@@ -977,6 +998,7 @@ svg.hud-hover-white:hover {
   line-height: 0;
   width: var(--lang-tag-w);
   height: var(--lang-tag-h);
+  cursor: pointer;
 }
 
 .archive-lang img {
@@ -996,8 +1018,12 @@ svg.hud-hover-white:hover {
   visibility: hidden;
 }
 
-.archive-lang-btn:not(.is-active) {
-  display: none;
+.archive-lang-btn.is-active .archive-lang-default {
+  visibility: hidden;
+}
+
+.archive-lang-btn.is-active .archive-lang-hover {
+  visibility: visible;
 }
 
 .archive-heading + .archive-body,

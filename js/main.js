@@ -151,6 +151,9 @@
       .split("")
       .map((ch) => {
         if (ch === " ") return `<span class="dot-title-space" aria-hidden="true"></span>`;
+        if (ch === "-" || ch === "–" || ch === "—") {
+          return `<img src="assets/fonts/dot-title/dash.png" width="87" height="150" alt="" draggable="false" />`;
+        }
         const key = ch.toLowerCase();
         if (!/[a-z]/.test(key)) return "";
         const width = key === "m" ? 149 : key === "w" ? 150 : 87;
@@ -955,9 +958,7 @@
     });
     const title = copy.querySelector(".archive-title");
     if (!title) return;
-    const en = title.dataset.titleEn || title.dataset.dotTitle || "";
-    const kr = title.dataset.titleKr || "";
-    const label = lang === "kr" && /[a-z]/i.test(kr) ? kr : en;
+    const label = title.dataset.titleLocal || title.dataset.titleEn || title.dataset.dotTitle || "";
     title.classList.remove("is-plain");
     title.dataset.dotTitle = label;
     title.setAttribute("aria-label", label);
@@ -970,8 +971,10 @@
     const body = copy.querySelector(".archive-body");
     const coda = copy.querySelector(".archive-coda");
     if (title) {
-      if (page.titleEn) title.dataset.titleEn = page.titleEn;
-      if (page.titleKr) title.dataset.titleKr = page.titleKr;
+      const own = title.dataset.titleLocal || title.dataset.dotTitle || "";
+      if (page.titleEn && (!own || page.titleEn.toUpperCase() === own.toUpperCase())) {
+        title.dataset.titleEn = page.titleEn;
+      }
     }
     if (body && page.bodyEn) body.textContent = page.bodyEn;
     if (coda && page.bodyKr) coda.textContent = page.bodyKr;
@@ -981,8 +984,9 @@
   function initArchiveLang() {
     document.querySelectorAll(".archive-col-copy").forEach((copy) => {
       const title = copy.querySelector(".archive-title");
-      if (title && !title.dataset.titleEn) {
-        title.dataset.titleEn = title.dataset.dotTitle || "";
+      if (title) {
+        if (!title.dataset.titleLocal) title.dataset.titleLocal = title.dataset.dotTitle || "";
+        if (!title.dataset.titleEn) title.dataset.titleEn = title.dataset.titleLocal;
       }
       const group = copy.querySelector(".archive-lang");
       if (!group) return;
@@ -990,7 +994,7 @@
       group.addEventListener("click", (event) => {
         const btn = event.target.closest(".archive-lang-btn");
         if (!btn || !copy.contains(btn)) return;
-        setArchiveCopyLang(copy, copy.dataset.lang === "kr" ? "en" : "kr");
+        setArchiveCopyLang(copy, btn.dataset.lang);
       });
     });
   }
