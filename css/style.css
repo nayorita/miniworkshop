@@ -1473,6 +1473,7 @@ svg.hud-hover-white:hover {
 }
 
 .music-detail {
+  --detail-photo-h: calc((100vw - var(--grid-margin) * 2 - var(--grid-gutter)) * 2 / 3 * 245 / 455);
   display: none;
   position: absolute;
   inset: 0;
@@ -1590,10 +1591,15 @@ svg.hud-hover-white:hover {
 
 .music-detail-media {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .music-detail-photo {
   position: relative;
+  width: fit-content;
+  max-width: 100%;
   overflow: hidden;
   background: #111;
 }
@@ -1614,11 +1620,11 @@ svg.hud-hover-white:hover {
 
 .music-detail-photo > img {
   display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 455 / 245;
-  object-fit: cover;
-  object-position: center bottom;
+  height: var(--detail-photo-h);
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center center;
 }
 
 .music-detail-navs {
@@ -1776,6 +1782,7 @@ body.is-music-archive-open .hud-top-group:last-of-type > :not(.music-trigger) {
   }
 
   .music-detail {
+    --detail-photo-h: calc((100vw - var(--grid-margin) * 2) * 245 / 455);
     grid-template-columns: 1fr;
     align-content: start;
     overflow-y: auto;

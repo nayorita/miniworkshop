@@ -336,19 +336,27 @@
     const destImg = dest?.querySelector("img");
     if (destImg && srcUrl) destImg.src = srcUrl;
     const navs = dest?.querySelector(".music-detail-navs");
-    playMusicHero(
-      srcUrl,
-      sr,
-      () => dest?.getBoundingClientRect(),
-      () => {
-        clearMusicFly();
-        view.root.classList.remove("is-opening-detail", "is-detail-ready");
-        resetOpenCards(kind);
-        musicOpenLock = false;
-      },
-      navs ? navs.cloneNode(true) : null,
-      "open"
-    );
+    const startFly = () => {
+      playMusicHero(
+        srcUrl,
+        sr,
+        () => dest?.getBoundingClientRect(),
+        () => {
+          clearMusicFly();
+          view.root.classList.remove("is-opening-detail", "is-detail-ready");
+          resetOpenCards(kind);
+          musicOpenLock = false;
+        },
+        navs ? navs.cloneNode(true) : null,
+        "open"
+      );
+    };
+    if (destImg && !destImg.complete) {
+      destImg.addEventListener("load", startFly, { once: true });
+      destImg.addEventListener("error", startFly, { once: true });
+    } else {
+      startFly();
+    }
   }
 
   function openArchiveDetail(item, card, kind) {
