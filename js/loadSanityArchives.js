@@ -3,6 +3,8 @@
   const DATASET = "production";
   const API_VERSION = "2026-09-12";
 
+  const IMAGE_PROJECTION = `{crop,hotspot,asset->{_id,url}}`;
+
   const MUSIC_QUERY = `*[_type == "musicArchive" && defined(slug.current)] | order(order asc, date desc) {
     _id,
     title,
@@ -18,8 +20,8 @@
     performanceDate,
     performancePlace,
     description,
-    "thumbnailUrl": thumbnail.asset->url,
-    "galleryUrls": gallery[].asset->url
+    thumbnail${IMAGE_PROJECTION},
+    gallery[]${IMAGE_PROJECTION}
   }`;
 
   const TRAVEL_QUERY = `*[_type == "travelArchive" && defined(slug.current)] | order(order asc, startDate desc) {
@@ -38,9 +40,40 @@
     tripDate,
     tripRoute,
     description,
-    "thumbnailUrl": thumbnail.asset->url,
-    "galleryUrls": gallery[].asset->url
+    thumbnail${IMAGE_PROJECTION},
+    gallery[]${IMAGE_PROJECTION}
   }`;
+
+  const ASSET_REF = /^image-([a-f0-9]+)-(\d+)x(\d+)-([a-z0-9]+)$/i;
+
+  function sanityImageUrl(image) {
+    if (!image) return "";
+    const ref = image.asset?._id || image.asset?._ref || "";
+    const match = ref.match(ASSET_REF);
+    const base = image.asset?.url || "";
+    if (!match) return base;
+    const width = Number(match[2]);
+    const height = Number(match[3]);
+    const url = new URL(
+      base ||
+        `https://cdn.sanity.io/images/${PROJECT_ID}/${DATASET}/${match[1]}-${width}x${height}.${match[4]}`
+    );
+    const crop = image.crop;
+    const hasCrop =
+      crop && (crop.left || crop.top || crop.right || crop.bottom);
+    if (hasCrop) {
+      const x = Math.round(width * (crop.left || 0));
+      const y = Math.round(height * (crop.top || 0));
+      const w = Math.max(1, Math.round(width * (1 - (crop.left || 0) - (crop.right || 0))));
+      const h = Math.max(1, Math.round(height * (1 - (crop.top || 0) - (crop.bottom || 0))));
+      url.searchParams.set("rect", `${x},${y},${w},${h}`);
+    } else if (image.hotspot && typeof image.hotspot.x === "number") {
+      url.searchParams.set("fp-x", String(image.hotspot.x));
+      url.searchParams.set("fp-y", String(image.hotspot.y));
+    }
+    url.searchParams.set("auto", "format");
+    return url.toString();
+  }
 
   function formatDotDate(value) {
     return String(value || "").replace(/-/g, ".").slice(0, 10);
@@ -67,8 +100,8 @@
     const venue = String(doc.venue || "").trim();
     const tags = [city, venue].filter(Boolean).map((tag) => tag.toUpperCase());
     const date = formatDotDate(doc.date);
-    const thumb = doc.thumbnailUrl || "";
-    const images = (Array.isArray(doc.galleryUrls) ? doc.galleryUrls : []).filter(Boolean);
+    const thumb = sanityImageUrl(doc.thumbnail);
+    const images = (Array.isArray(doc.gallery) ? doc.gallery : []).map(sanityImageUrl).filter(Boolean);
 
     return {
       id: doc.slug || doc._id,
@@ -98,8 +131,8 @@
       .map((city) => String(city || "").trim())
       .filter(Boolean);
     const date = travelDateLabel(doc);
-    const thumb = doc.thumbnailUrl || "";
-    const images = (Array.isArray(doc.galleryUrls) ? doc.galleryUrls : []).filter(Boolean);
+    const thumb = sanityImageUrl(doc.thumbnail);
+    const images = (Array.isArray(doc.gallery) ? doc.gallery : []).map(sanityImageUrl).filter(Boolean);
     const route = tags.join("-");
 
     return {
