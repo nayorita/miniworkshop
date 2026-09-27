@@ -919,9 +919,7 @@ svg.hud-hover-white:hover {
   color: #ffffff;
 }
 
-#archive.is-open .archive-col-copy,
-#archive.is-open .archive-lang,
-#archive.is-open .archive-lang-btn {
+#archive.is-open .archive-col-copy {
   pointer-events: auto;
 }
 
@@ -979,61 +977,8 @@ svg.hud-hover-white:hover {
   height: var(--dot-title-h);
 }
 
-.archive-lang {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  flex: 0 0 auto;
-  gap: 8px;
-  margin: 0;
-  pointer-events: auto;
-}
-
-.archive-lang-btn {
-  --lang-tag-h: calc(var(--hud-icon-h) * 11 / 14);
-  --lang-tag-w: calc(var(--lang-tag-h) * 184 / 150);
-  position: relative;
-  display: block;
-  padding: 0;
-  line-height: 0;
-  width: var(--lang-tag-w);
-  height: var(--lang-tag-h);
-  cursor: pointer;
-}
-
-.archive-lang img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: fill;
-  mix-blend-mode: normal;
-  filter: brightness(0) invert(1);
-  pointer-events: none;
-  user-select: none;
-}
-
-.archive-lang-hover {
-  position: absolute;
-  inset: 0;
-  visibility: hidden;
-}
-
-.archive-lang-btn.is-active .archive-lang-default {
-  visibility: hidden;
-}
-
-.archive-lang-btn.is-active .archive-lang-hover {
-  visibility: visible;
-}
-
-.archive-heading + .archive-body,
-.archive-col-copy[data-lang="kr"] .archive-coda {
+.archive-heading + .archive-body {
   margin-top: 26px;
-}
-
-.archive-col-copy[data-lang="en"] .archive-coda,
-.archive-col-copy[data-lang="kr"] .archive-body {
-  display: none;
 }
 
 .archive-body,
@@ -1352,11 +1297,6 @@ svg.hud-hover-white:hover {
   pointer-events: auto;
 }
 
-#archive.is-detail-open:not(.is-closing-detail) .archive-lang,
-#music-archive.is-detail-open:not(.is-closing-detail) .archive-lang {
-  display: none;
-}
-
 #archive.is-detail-open:not(.is-closing-detail) .archive-scroll,
 #music-archive.is-detail-open:not(.is-closing-detail) .archive-scroll {
   visibility: hidden;
@@ -1427,7 +1367,22 @@ svg.hud-hover-white:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center center;
+  object-position: center bottom;
+}
+
+.music-fly-frame::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 42%;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.62) 0%,
+    rgba(0, 0, 0, 0.28) 45%,
+    transparent 100%
+  );
 }
 
 .music-fly-frame .music-detail-navs {
@@ -1443,12 +1398,16 @@ svg.hud-hover-white:hover {
     height 0.52s var(--ease-apple);
 }
 
+.music-fly-frame.is-open-fly.is-flying::after,
 .music-fly-frame.is-open-fly.is-flying .music-detail-navs,
+.music-fly-frame.is-close-fly:not(.is-flying)::after,
 .music-fly-frame.is-close-fly:not(.is-flying) .music-detail-navs {
   opacity: 1;
 }
 
+.music-fly-frame.is-open-fly.is-flying::after,
 .music-fly-frame.is-open-fly.is-flying .music-detail-navs,
+.music-fly-frame.is-close-fly.is-flying::after,
 .music-fly-frame.is-close-fly.is-flying .music-detail-navs {
   transition: opacity 0.52s var(--ease-apple);
 }
@@ -1478,11 +1437,7 @@ svg.hud-hover-white:hover {
 }
 
 #archive.is-opening-detail .music-detail-photo,
-#music-archive.is-opening-detail .music-detail-photo,
-#archive.is-opening-detail .music-detail-navs,
-#music-archive.is-opening-detail .music-detail-navs,
-#archive.is-closing-detail .music-detail-navs,
-#music-archive.is-closing-detail .music-detail-navs {
+#music-archive.is-opening-detail .music-detail-photo {
   background: transparent;
   visibility: hidden;
 }
@@ -1575,16 +1530,26 @@ svg.hud-hover-white:hover {
 
 .music-detail-media {
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
 }
 
 .music-detail-photo {
   position: relative;
-  width: 100%;
   overflow: hidden;
-  background: transparent;
+  background: #111;
+}
+
+.music-detail-photo::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 42%;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.62) 0%,
+    rgba(0, 0, 0, 0.28) 45%,
+    transparent 100%
+  );
 }
 
 .music-detail-photo > img {
@@ -1592,17 +1557,18 @@ svg.hud-hover-white:hover {
   width: 100%;
   height: auto;
   aspect-ratio: 455 / 245;
-  object-fit: contain;
-  object-position: left center;
+  object-fit: cover;
+  object-position: center bottom;
 }
 
 .music-detail-navs {
-  position: relative;
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
   z-index: 1;
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-top: 14px;
 }
 
 .music-detail-nav {
@@ -1625,13 +1591,9 @@ svg.hud-hover-white:hover {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 33px 0 0;
+  margin: 14px 0 0;
   padding: 0;
   list-style: none;
-}
-
-.music-detail-tags + .music-detail-meta {
-  margin-top: 26px;
 }
 
 .music-detail-tags li {

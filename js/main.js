@@ -215,17 +215,15 @@
     view.panel.innerHTML = `
       <div class="music-detail-copy">
         <h2 class="music-detail-title" aria-label="${escapeHtml(data.title)}">${title}</h2>
-        ${tags ? `<ul class="music-detail-tags">${tags}</ul>` : ""}
         <dl class="music-detail-meta">${rows}</dl>
         ${data.body ? `<p class="music-detail-body">${escapeHtml(data.body)}</p>` : ""}
       </div>
       <div class="music-detail-media">
         <div class="music-detail-photo">
           <img src="${escapeHtml(data.images[0] || "")}" alt="${escapeHtml(data.title)}" />
-        </div>
-        ${
-          data.images.length > 1
-            ? `<div class="music-detail-navs">
+          ${
+            data.images.length > 1
+              ? `<div class="music-detail-navs">
             <button type="button" class="music-detail-nav" data-photo-step="-1" aria-label="Previous photo">
               <img src="assets/icons/arrow-left.png" width="87" height="150" alt="" />
             </button>
@@ -233,8 +231,10 @@
               <img src="assets/icons/arrow-right.png" width="87" height="150" alt="" />
             </button>
           </div>`
-            : ""
-        }
+              : ""
+          }
+        </div>
+        ${tags ? `<ul class="music-detail-tags">${tags}</ul>` : ""}
       </div>
     `;
   }
@@ -253,32 +253,6 @@
     el.style.top = `${rect.top}px`;
     el.style.width = `${rect.width}px`;
     el.style.height = `${rect.height}px`;
-  }
-
-  function containedImageRect(boxEl, imgEl) {
-    const box = boxEl?.getBoundingClientRect();
-    if (!box) return null;
-    const nw = imgEl?.naturalWidth || 0;
-    const nh = imgEl?.naturalHeight || 0;
-    if (!nw || !nh || box.width < 8 || box.height < 8) return box;
-    const boxRatio = box.width / box.height;
-    const imgRatio = nw / nh;
-    if (imgRatio > boxRatio) {
-      const height = box.width / imgRatio;
-      return {
-        left: box.left,
-        top: box.top + (box.height - height) / 2,
-        width: box.width,
-        height,
-      };
-    }
-    const width = box.height * imgRatio;
-    return {
-      left: box.left,
-      top: box.top,
-      width,
-      height: box.height,
-    };
   }
 
   function playMusicHero(srcUrl, fromRect, getToRect, onDone, chrome, mode) {
@@ -361,18 +335,19 @@
     const dest = view.panel.querySelector(".music-detail-photo");
     const destImg = dest?.querySelector("img");
     if (destImg && srcUrl) destImg.src = srcUrl;
+    const navs = dest?.querySelector(".music-detail-navs");
     const startFly = () => {
       playMusicHero(
         srcUrl,
         sr,
-        () => containedImageRect(dest, destImg),
+        () => dest?.getBoundingClientRect(),
         () => {
           clearMusicFly();
           view.root.classList.remove("is-opening-detail", "is-detail-ready");
           resetOpenCards(kind);
           musicOpenLock = false;
         },
-        null,
+        navs ? navs.cloneNode(true) : null,
         "open"
       );
     };
@@ -455,11 +430,12 @@
       card.querySelector(".archive-card-photo img") ||
       card.querySelector(".archive-card-photo") ||
       card;
-    const dr = containedImageRect(dest, destImg) || dest?.getBoundingClientRect();
+    const dr = dest?.getBoundingClientRect();
     const srcUrl = destImg?.currentSrc || destImg?.src || cardImg.src || "";
 
     card.classList.add("is-returning");
     view.root.classList.add("is-closing-detail");
+    const navs = dest?.querySelector(".music-detail-navs");
     playMusicHero(
       srcUrl,
       dr || cardImg.getBoundingClientRect(),
@@ -467,7 +443,7 @@
       () => {
         finishCloseArchiveDetail();
       },
-      null,
+      navs ? navs.cloneNode(true) : null,
       "close"
     );
   }
@@ -981,14 +957,8 @@
     setFocusVisible(false);
   }
 
-  function setArchiveCopyLang(copy, lang) {
-    copy.dataset.lang = lang;
-    copy.querySelectorAll(".archive-lang-btn").forEach((el) => {
-      const on = el.dataset.lang === lang;
-      el.classList.toggle("is-active", on);
-      el.setAttribute("aria-pressed", on ? "true" : "false");
-    });
-    const title = copy.querySelector(".archive-title");
+  function paintArchiveTitle(copy) {
+    const title = copy?.querySelector(".archive-title");
     if (!title) return;
     const label = title.dataset.titleLocal || title.dataset.titleEn || title.dataset.dotTitle || "";
     title.classList.remove("is-plain");
@@ -1010,24 +980,17 @@
     }
     if (body && page.bodyEn) body.textContent = page.bodyEn;
     if (coda && page.bodyKr) coda.textContent = page.bodyKr;
-    setArchiveCopyLang(copy, copy.dataset.lang || "en");
+    paintArchiveTitle(copy);
   }
 
-  function initArchiveLang() {
+  function initArchiveCopy() {
     document.querySelectorAll(".archive-col-copy").forEach((copy) => {
       const title = copy.querySelector(".archive-title");
       if (title) {
         if (!title.dataset.titleLocal) title.dataset.titleLocal = title.dataset.dotTitle || "";
         if (!title.dataset.titleEn) title.dataset.titleEn = title.dataset.titleLocal;
       }
-      const group = copy.querySelector(".archive-lang");
-      if (!group) return;
-
-      group.addEventListener("click", (event) => {
-        const btn = event.target.closest(".archive-lang-btn");
-        if (!btn || !copy.contains(btn)) return;
-        setArchiveCopyLang(copy, btn.dataset.lang);
-      });
+      paintArchiveTitle(copy);
     });
   }
 
@@ -1062,7 +1025,7 @@
       .catch(() => {});
   }
   renderDotTitles();
-  initArchiveLang();
+  initArchiveCopy();
   if (typeof window.loadArchivePages === "function") {
     window
       .loadArchivePages()
