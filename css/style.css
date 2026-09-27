@@ -1616,11 +1616,11 @@ svg.hud-hover-white:hover {
 }
 
 .music-detail-nav.is-prev {
-  left: 10px;
+  left: 20px;
 }
 
 .music-detail-nav.is-next {
-  right: 10px;
+  right: 20px;
 }
 
 .music-detail-nav img {
