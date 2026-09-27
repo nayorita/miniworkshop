@@ -1427,22 +1427,7 @@ svg.hud-hover-white:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center bottom;
-}
-
-.music-fly-frame::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 0;
-  height: 42%;
-  pointer-events: none;
-  opacity: 0;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.62) 0%,
-    rgba(0, 0, 0, 0.28) 45%,
-    transparent 100%
-  );
+  object-position: center center;
 }
 
 .music-fly-frame .music-detail-navs {
@@ -1458,22 +1443,17 @@ svg.hud-hover-white:hover {
     height 0.52s var(--ease-apple);
 }
 
-.music-fly-frame.is-open-fly.is-flying::after,
 .music-fly-frame.is-open-fly.is-flying .music-detail-navs,
-.music-fly-frame.is-close-fly:not(.is-flying)::after,
 .music-fly-frame.is-close-fly:not(.is-flying) .music-detail-navs {
   opacity: 1;
 }
 
-.music-fly-frame.is-open-fly.is-flying::after,
 .music-fly-frame.is-open-fly.is-flying .music-detail-navs,
-.music-fly-frame.is-close-fly.is-flying::after,
 .music-fly-frame.is-close-fly.is-flying .music-detail-navs {
   transition: opacity 0.52s var(--ease-apple);
 }
 
 .music-detail {
-  --detail-photo-h: calc((100vw - var(--grid-margin) * 2 - var(--grid-gutter)) * 2 / 3 * 245 / 455);
   display: none;
   position: absolute;
   inset: 0;
@@ -1598,31 +1578,16 @@ svg.hud-hover-white:hover {
 
 .music-detail-photo {
   position: relative;
-  width: fit-content;
-  max-width: 100%;
+  width: 100%;
   overflow: hidden;
-  background: #111;
-}
-
-.music-detail-photo::after {
-  content: "";
-  position: absolute;
-  inset: auto 0 0;
-  height: 42%;
-  pointer-events: none;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.62) 0%,
-    rgba(0, 0, 0, 0.28) 45%,
-    transparent 100%
-  );
+  background: transparent;
 }
 
 .music-detail-photo > img {
   display: block;
-  height: var(--detail-photo-h);
-  width: auto;
-  max-width: 100%;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 455 / 245;
   object-fit: contain;
   object-position: center center;
 }
@@ -1782,7 +1747,6 @@ body.is-music-archive-open .hud-top-group:last-of-type > :not(.music-trigger) {
   }
 
   .music-detail {
-    --detail-photo-h: calc((100vw - var(--grid-margin) * 2) * 245 / 455);
     grid-template-columns: 1fr;
     align-content: start;
     overflow-y: auto;

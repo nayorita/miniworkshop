@@ -255,6 +255,32 @@
     el.style.height = `${rect.height}px`;
   }
 
+  function containedImageRect(boxEl, imgEl) {
+    const box = boxEl?.getBoundingClientRect();
+    if (!box) return null;
+    const nw = imgEl?.naturalWidth || 0;
+    const nh = imgEl?.naturalHeight || 0;
+    if (!nw || !nh || box.width < 8 || box.height < 8) return box;
+    const boxRatio = box.width / box.height;
+    const imgRatio = nw / nh;
+    if (imgRatio > boxRatio) {
+      const height = box.width / imgRatio;
+      return {
+        left: box.left,
+        top: box.top + (box.height - height) / 2,
+        width: box.width,
+        height,
+      };
+    }
+    const width = box.height * imgRatio;
+    return {
+      left: box.left + (box.width - width) / 2,
+      top: box.top,
+      width,
+      height: box.height,
+    };
+  }
+
   function playMusicHero(srcUrl, fromRect, getToRect, onDone, chrome, mode) {
     clearMusicFly();
     const frame = document.createElement("div");
@@ -340,7 +366,7 @@
       playMusicHero(
         srcUrl,
         sr,
-        () => dest?.getBoundingClientRect(),
+        () => containedImageRect(dest, destImg),
         () => {
           clearMusicFly();
           view.root.classList.remove("is-opening-detail", "is-detail-ready");
@@ -430,7 +456,7 @@
       card.querySelector(".archive-card-photo img") ||
       card.querySelector(".archive-card-photo") ||
       card;
-    const dr = dest?.getBoundingClientRect();
+    const dr = containedImageRect(dest, destImg) || dest?.getBoundingClientRect();
     const srcUrl = destImg?.currentSrc || destImg?.src || cardImg.src || "";
 
     card.classList.add("is-returning");
