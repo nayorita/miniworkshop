@@ -1646,13 +1646,13 @@ svg.hud-hover-white:hover {
 }
 
 .music-detail-nav.is-prev::after {
-  -webkit-mask-image: url("../assets/icons/arrow-left.png?v=20260927a");
-  mask-image: url("../assets/icons/arrow-left.png?v=20260927a");
+  -webkit-mask-image: url("../assets/icons/arrow-left.png?v=20260927b");
+  mask-image: url("../assets/icons/arrow-left.png?v=20260927b");
 }
 
 .music-detail-nav.is-next::after {
-  -webkit-mask-image: url("../assets/icons/arrow-right.png?v=20260927a");
-  mask-image: url("../assets/icons/arrow-right.png?v=20260927a");
+  -webkit-mask-image: url("../assets/icons/arrow-right.png?v=20260927b");
+  mask-image: url("../assets/icons/arrow-right.png?v=20260927b");
 }
 
 .music-detail-thumbs {

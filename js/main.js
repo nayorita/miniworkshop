@@ -235,10 +235,10 @@
             data.images.length > 1
               ? `<div class="music-detail-navs">
             <button type="button" class="music-detail-nav is-prev" data-photo-step="-1" aria-label="Previous photo">
-              <img src="assets/icons/arrow-left.png?v=20260927a" width="117" height="210" alt="" />
+              <img src="assets/icons/arrow-left.png?v=20260927b" width="117" height="210" alt="" />
             </button>
             <button type="button" class="music-detail-nav is-next" data-photo-step="1" aria-label="Next photo">
-              <img src="assets/icons/arrow-right.png?v=20260927a" width="117" height="210" alt="" />
+              <img src="assets/icons/arrow-right.png?v=20260927b" width="117" height="210" alt="" />
             </button>
           </div>`
               : ""
