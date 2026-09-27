@@ -1625,7 +1625,7 @@ svg.hud-hover-white:hover {
 
 .music-detail-nav img {
   display: block;
-  height: calc(var(--hud-icon-h) * 11 / 25);
+  height: calc(var(--hud-icon-h) * 77 / 125);
   width: auto;
   opacity: 0;
 }
@@ -1646,13 +1646,13 @@ svg.hud-hover-white:hover {
 }
 
 .music-detail-nav.is-prev::after {
-  -webkit-mask-image: url("../assets/icons/arrow-left.png");
-  mask-image: url("../assets/icons/arrow-left.png");
+  -webkit-mask-image: url("../assets/icons/arrow-left.png?v=20260927a");
+  mask-image: url("../assets/icons/arrow-left.png?v=20260927a");
 }
 
 .music-detail-nav.is-next::after {
-  -webkit-mask-image: url("../assets/icons/arrow-right.png");
-  mask-image: url("../assets/icons/arrow-right.png");
+  -webkit-mask-image: url("../assets/icons/arrow-right.png?v=20260927a");
+  mask-image: url("../assets/icons/arrow-right.png?v=20260927a");
 }
 
 .music-detail-thumbs {
