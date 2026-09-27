@@ -1635,7 +1635,7 @@ svg.hud-hover-white:hover {
   content: "";
   position: absolute;
   inset: 6px;
-  background: var(--hud-active);
+  background: #ffffff;
   pointer-events: none;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
