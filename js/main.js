@@ -215,15 +215,17 @@
     view.panel.innerHTML = `
       <div class="music-detail-copy">
         <h2 class="music-detail-title" aria-label="${escapeHtml(data.title)}">${title}</h2>
+        ${tags ? `<ul class="music-detail-tags">${tags}</ul>` : ""}
         <dl class="music-detail-meta">${rows}</dl>
         ${data.body ? `<p class="music-detail-body">${escapeHtml(data.body)}</p>` : ""}
       </div>
       <div class="music-detail-media">
         <div class="music-detail-photo">
           <img src="${escapeHtml(data.images[0] || "")}" alt="${escapeHtml(data.title)}" />
-          ${
-            data.images.length > 1
-              ? `<div class="music-detail-navs">
+        </div>
+        ${
+          data.images.length > 1
+            ? `<div class="music-detail-navs">
             <button type="button" class="music-detail-nav" data-photo-step="-1" aria-label="Previous photo">
               <img src="assets/icons/arrow-left.png" width="87" height="150" alt="" />
             </button>
@@ -231,10 +233,8 @@
               <img src="assets/icons/arrow-right.png" width="87" height="150" alt="" />
             </button>
           </div>`
-              : ""
-          }
-        </div>
-        ${tags ? `<ul class="music-detail-tags">${tags}</ul>` : ""}
+            : ""
+        }
       </div>
     `;
   }
@@ -274,7 +274,7 @@
     }
     const width = box.height * imgRatio;
     return {
-      left: box.left + (box.width - width) / 2,
+      left: box.left,
       top: box.top,
       width,
       height: box.height,
@@ -361,7 +361,6 @@
     const dest = view.panel.querySelector(".music-detail-photo");
     const destImg = dest?.querySelector("img");
     if (destImg && srcUrl) destImg.src = srcUrl;
-    const navs = dest?.querySelector(".music-detail-navs");
     const startFly = () => {
       playMusicHero(
         srcUrl,
@@ -373,7 +372,7 @@
           resetOpenCards(kind);
           musicOpenLock = false;
         },
-        navs ? navs.cloneNode(true) : null,
+        null,
         "open"
       );
     };
@@ -461,7 +460,6 @@
 
     card.classList.add("is-returning");
     view.root.classList.add("is-closing-detail");
-    const navs = dest?.querySelector(".music-detail-navs");
     playMusicHero(
       srcUrl,
       dr || cardImg.getBoundingClientRect(),
@@ -469,7 +467,7 @@
       () => {
         finishCloseArchiveDetail();
       },
-      navs ? navs.cloneNode(true) : null,
+      null,
       "close"
     );
   }

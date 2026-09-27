@@ -1478,7 +1478,11 @@ svg.hud-hover-white:hover {
 }
 
 #archive.is-opening-detail .music-detail-photo,
-#music-archive.is-opening-detail .music-detail-photo {
+#music-archive.is-opening-detail .music-detail-photo,
+#archive.is-opening-detail .music-detail-navs,
+#music-archive.is-opening-detail .music-detail-navs,
+#archive.is-closing-detail .music-detail-navs,
+#music-archive.is-closing-detail .music-detail-navs {
   background: transparent;
   visibility: hidden;
 }
@@ -1589,17 +1593,16 @@ svg.hud-hover-white:hover {
   height: auto;
   aspect-ratio: 455 / 245;
   object-fit: contain;
-  object-position: center center;
+  object-position: left center;
 }
 
 .music-detail-navs {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
+  position: relative;
   z-index: 1;
   display: flex;
   align-items: center;
   gap: 4px;
+  margin-top: 14px;
 }
 
 .music-detail-nav {
@@ -1622,9 +1625,13 @@ svg.hud-hover-white:hover {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 14px 0 0;
+  margin: 33px 0 0;
   padding: 0;
   list-style: none;
+}
+
+.music-detail-tags + .music-detail-meta {
+  margin-top: 26px;
 }
 
 .music-detail-tags li {
