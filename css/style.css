@@ -1378,10 +1378,10 @@ svg.hud-hover-white:hover {
   opacity: 0;
   background: linear-gradient(
     to right,
-    rgba(0, 0, 0, 0.22) 0%,
-    transparent 10%,
-    transparent 90%,
-    rgba(0, 0, 0, 0.22) 100%
+    rgba(0, 0, 0, 0.44) 0%,
+    transparent 14%,
+    transparent 86%,
+    rgba(0, 0, 0, 0.44) 100%
   );
 }
 
@@ -1565,10 +1565,10 @@ svg.hud-hover-white:hover {
   pointer-events: none;
   background: linear-gradient(
     to right,
-    rgba(0, 0, 0, 0.22) 0%,
-    transparent 10%,
-    transparent 90%,
-    rgba(0, 0, 0, 0.22) 100%
+    rgba(0, 0, 0, 0.44) 0%,
+    transparent 14%,
+    transparent 86%,
+    rgba(0, 0, 0, 0.44) 100%
   );
 }
 
