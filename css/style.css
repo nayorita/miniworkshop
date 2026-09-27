@@ -1370,6 +1370,21 @@ svg.hud-hover-white:hover {
   object-position: center bottom;
 }
 
+.music-fly-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.22) 0%,
+    transparent 10%,
+    transparent 90%,
+    rgba(0, 0, 0, 0.22) 100%
+  );
+}
+
 .music-fly-frame::after {
   content: "";
   position: absolute;
@@ -1398,15 +1413,19 @@ svg.hud-hover-white:hover {
     height 0.52s var(--ease-apple);
 }
 
+.music-fly-frame.is-open-fly.is-flying::before,
 .music-fly-frame.is-open-fly.is-flying::after,
 .music-fly-frame.is-open-fly.is-flying .music-detail-navs,
+.music-fly-frame.is-close-fly:not(.is-flying)::before,
 .music-fly-frame.is-close-fly:not(.is-flying)::after,
 .music-fly-frame.is-close-fly:not(.is-flying) .music-detail-navs {
   opacity: 1;
 }
 
+.music-fly-frame.is-open-fly.is-flying::before,
 .music-fly-frame.is-open-fly.is-flying::after,
 .music-fly-frame.is-open-fly.is-flying .music-detail-navs,
+.music-fly-frame.is-close-fly.is-flying::before,
 .music-fly-frame.is-close-fly.is-flying::after,
 .music-fly-frame.is-close-fly.is-flying .music-detail-navs {
   transition: opacity 0.52s var(--ease-apple);
@@ -1442,8 +1461,8 @@ svg.hud-hover-white:hover {
   visibility: hidden;
 }
 
-#archive.is-opening-detail .music-detail-tags,
-#music-archive.is-opening-detail .music-detail-tags {
+#archive.is-opening-detail .music-detail-thumbs,
+#music-archive.is-opening-detail .music-detail-thumbs {
   animation: music-detail-copy-in 0.28s var(--ease-out) both;
 }
 
@@ -1538,6 +1557,21 @@ svg.hud-hover-white:hover {
   background: #111;
 }
 
+.music-detail-photo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.22) 0%,
+    transparent 10%,
+    transparent 90%,
+    rgba(0, 0, 0, 0.22) 100%
+  );
+}
+
 .music-detail-photo::after {
   content: "";
   position: absolute;
@@ -1563,31 +1597,65 @@ svg.hud-hover-white:hover {
 
 .music-detail-navs {
   position: absolute;
-  right: 10px;
-  bottom: 10px;
+  inset: 0;
   z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  pointer-events: none;
 }
 
 .music-detail-nav {
+  position: absolute;
+  top: 50%;
   display: grid;
   place-items: center;
   padding: 6px;
   border: 0;
   background: none;
   cursor: pointer;
+  pointer-events: auto;
+  transform: translateY(-50%);
+}
+
+.music-detail-nav.is-prev {
+  left: 10px;
+}
+
+.music-detail-nav.is-next {
+  right: 10px;
 }
 
 .music-detail-nav img {
   display: block;
   height: calc(var(--hud-icon-h) * 11 / 25);
   width: auto;
-  mix-blend-mode: screen;
+  opacity: 0;
 }
 
-.music-detail-tags {
+.music-detail-nav.is-prev::after,
+.music-detail-nav.is-next::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  background: var(--hud-active);
+  pointer-events: none;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.music-detail-nav.is-prev::after {
+  -webkit-mask-image: url("../assets/icons/arrow-left.png");
+  mask-image: url("../assets/icons/arrow-left.png");
+}
+
+.music-detail-nav.is-next::after {
+  -webkit-mask-image: url("../assets/icons/arrow-right.png");
+  mask-image: url("../assets/icons/arrow-right.png");
+}
+
+.music-detail-thumbs {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -1596,16 +1664,27 @@ svg.hud-hover-white:hover {
   list-style: none;
 }
 
-.music-detail-tags li {
-  padding: 6px 10px;
-  border-radius: 4px;
-  background: #ffffff;
-  color: #111111;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  line-height: 1;
-  letter-spacing: 0;
-  text-transform: uppercase;
+.music-detail-thumb {
+  display: block;
+  width: calc(36px * 455 / 245);
+  height: 36px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: #111;
+  cursor: pointer;
+  opacity: 0.45;
+}
+
+.music-detail-thumb.is-active {
+  opacity: 1;
+}
+
+.music-detail-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center bottom;
 }
 
 body.is-archive-open {

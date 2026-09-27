@@ -209,9 +209,19 @@
           `<div><dt>${escapeHtml(row.label || "")}</dt><dd>${escapeHtml(row.value || "")}</dd></div>`
       )
       .join("");
-    const tags = data.tags
-      .map((tag) => `<li>${escapeHtml(tag)}</li>`)
-      .join("");
+    const thumbs =
+      data.images.length > 1
+        ? data.images
+            .map(
+              (src, index) =>
+                `<li>
+                  <button type="button" class="music-detail-thumb${index === 0 ? " is-active" : ""}" data-photo-index="${index}" aria-label="Photo ${index + 1}">
+                    <img src="${escapeHtml(src)}" alt="" />
+                  </button>
+                </li>`
+            )
+            .join("")
+        : "";
     view.panel.innerHTML = `
       <div class="music-detail-copy">
         <h2 class="music-detail-title" aria-label="${escapeHtml(data.title)}">${title}</h2>
@@ -224,17 +234,17 @@
           ${
             data.images.length > 1
               ? `<div class="music-detail-navs">
-            <button type="button" class="music-detail-nav" data-photo-step="-1" aria-label="Previous photo">
+            <button type="button" class="music-detail-nav is-prev" data-photo-step="-1" aria-label="Previous photo">
               <img src="assets/icons/arrow-left.png" width="87" height="150" alt="" />
             </button>
-            <button type="button" class="music-detail-nav" data-photo-step="1" aria-label="Next photo">
+            <button type="button" class="music-detail-nav is-next" data-photo-step="1" aria-label="Next photo">
               <img src="assets/icons/arrow-right.png" width="87" height="150" alt="" />
             </button>
           </div>`
               : ""
           }
         </div>
-        ${tags ? `<ul class="music-detail-tags">${tags}</ul>` : ""}
+        ${thumbs ? `<ul class="music-detail-thumbs">${thumbs}</ul>` : ""}
       </div>
     `;
   }
@@ -369,6 +379,23 @@
     showArchiveDetail(item, kind);
   }
 
+  function showArchivePhoto(index) {
+    const kind = openDetailKind();
+    if (!kind) return;
+    const view = getDetailView(kind);
+    const item = view.items().find((entry) => entry.id === view.panel?.dataset.id);
+    if (!item) return;
+    const images = archiveDetailFrom(item, kind).images;
+    if (!images.length) return;
+    const next = (index + images.length) % images.length;
+    view.panel.dataset.photo = String(next);
+    const photo = view.panel.querySelector(".music-detail-photo > img");
+    if (photo) photo.src = images[next];
+    view.panel.querySelectorAll(".music-detail-thumb").forEach((el, i) => {
+      el.classList.toggle("is-active", i === next);
+    });
+  }
+
   function stepArchivePhoto(step) {
     const kind = openDetailKind();
     if (!kind) return;
@@ -377,11 +404,7 @@
     if (!item) return;
     const images = archiveDetailFrom(item, kind).images;
     if (images.length < 2) return;
-    const index = Number(view.panel.dataset.photo || 0);
-    const next = (index + step + images.length) % images.length;
-    view.panel.dataset.photo = String(next);
-    const photo = view.panel.querySelector(".music-detail-photo > img");
-    if (photo) photo.src = images[next];
+    showArchivePhoto(Number(view.panel.dataset.photo || 0) + step);
   }
 
   function finishCloseArchiveDetail() {
@@ -659,6 +682,11 @@
 
   [musicDetail, travelDetail].forEach((panel) => {
     panel?.addEventListener("click", (event) => {
+      const thumb = event.target.closest("[data-photo-index]");
+      if (thumb) {
+        showArchivePhoto(Number(thumb.dataset.photoIndex));
+        return;
+      }
       const nav = event.target.closest("[data-photo-step]");
       if (!nav) return;
       stepArchivePhoto(Number(nav.dataset.photoStep));
