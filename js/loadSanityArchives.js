@@ -4,6 +4,8 @@
   const API_VERSION = "2026-09-12";
 
   const IMAGE_PROJECTION = `{crop,hotspot,asset->{_id,url}}`;
+  const GALLERY_PROJECTION = `{_type,crop,hotspot,asset->{_id,url},images[]${IMAGE_PROJECTION}}`;
+  const DETAIL_RATIO = 455 / 245;
 
   const MUSIC_QUERY = `*[_type == "musicArchive" && defined(slug.current)] | order(order asc, date desc) {
     _id,
@@ -21,7 +23,7 @@
     performancePlace,
     description,
     thumbnail${IMAGE_PROJECTION},
-    gallery[]${IMAGE_PROJECTION}
+    gallery[]${GALLERY_PROJECTION}
   }`;
 
   const TRAVEL_QUERY = `*[_type == "travelArchive" && defined(slug.current)] | order(order asc, startDate desc) {
@@ -41,12 +43,12 @@
     tripRoute,
     description,
     thumbnail${IMAGE_PROJECTION},
-    gallery[]${IMAGE_PROJECTION}
+    gallery[]${GALLERY_PROJECTION}
   }`;
 
   const ASSET_REF = /^image-([a-f0-9]+)-(\d+)x(\d+)-([a-z0-9]+)$/i;
 
-  function sanityImageUrl(image) {
+  function sanityImageUrl(image, ratio) {
     if (!image) return "";
     const ref = image.asset?._id || image.asset?._ref || "";
     const match = ref.match(ASSET_REF);
@@ -71,8 +73,26 @@
       url.searchParams.set("fp-x", String(image.hotspot.x));
       url.searchParams.set("fp-y", String(image.hotspot.y));
     }
+    if (ratio) {
+      url.searchParams.set("w", "720");
+      url.searchParams.set("h", String(Math.round(720 / ratio)));
+      url.searchParams.set("fit", "crop");
+      if (url.searchParams.has("fp-x")) url.searchParams.set("crop", "focalpoint");
+    }
     url.searchParams.set("auto", "format");
     return url.toString();
+  }
+
+  function galleryUrls(gallery) {
+    return (Array.isArray(gallery) ? gallery : [])
+      .map((entry) => {
+        if (entry?._type !== "photoStrip") return sanityImageUrl(entry);
+        const parts = (Array.isArray(entry.images) ? entry.images : []).slice(0, 3);
+        const ratio = DETAIL_RATIO / Math.max(parts.length, 1);
+        const urls = parts.map((image) => sanityImageUrl(image, ratio)).filter(Boolean);
+        return urls.length > 1 ? urls : urls[0] || "";
+      })
+      .filter((slide) => (Array.isArray(slide) ? slide.length : slide));
   }
 
   function formatDotDate(value) {
@@ -101,7 +121,7 @@
     const tags = [city, venue].filter(Boolean).map((tag) => tag.toUpperCase());
     const date = formatDotDate(doc.date);
     const thumb = sanityImageUrl(doc.thumbnail);
-    const images = (Array.isArray(doc.gallery) ? doc.gallery : []).map(sanityImageUrl).filter(Boolean);
+    const images = galleryUrls(doc.gallery);
 
     return {
       id: doc.slug || doc._id,
@@ -132,7 +152,7 @@
       .filter(Boolean);
     const date = travelDateLabel(doc);
     const thumb = sanityImageUrl(doc.thumbnail);
-    const images = (Array.isArray(doc.gallery) ? doc.gallery : []).map(sanityImageUrl).filter(Boolean);
+    const images = galleryUrls(doc.gallery);
     const route = tags.join("-");
 
     return {

@@ -1595,6 +1595,23 @@ svg.hud-hover-white:hover {
   object-position: center bottom;
 }
 
+.music-detail-strip {
+  display: grid;
+  grid-template-columns: repeat(var(--strip-count, 3), minmax(0, 1fr));
+  width: 100%;
+  aspect-ratio: 455 / 245;
+  background: #111;
+}
+
+.music-detail-strip img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  object-fit: cover;
+  object-position: center;
+}
+
 .music-detail-navs {
   position: absolute;
   inset: 0;
@@ -1685,6 +1702,15 @@ svg.hud-hover-white:hover {
   height: 100%;
   object-fit: cover;
   object-position: center bottom;
+}
+
+.music-detail-thumb .music-detail-strip {
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+.music-detail-thumb .music-detail-strip img {
+  object-position: center;
 }
 
 body.is-archive-open {

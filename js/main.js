@@ -133,8 +133,12 @@
       ? detail.images
       : [detail.image || item.image || ""]
     )
-      .map((path) => resolveArchiveImage(path))
-      .filter(Boolean);
+      .map((slide) =>
+        Array.isArray(slide)
+          ? slide.map((path) => resolveArchiveImage(path)).filter(Boolean)
+          : resolveArchiveImage(slide)
+      )
+      .filter((slide) => (Array.isArray(slide) ? slide.length : slide));
     return {
       title: detail.title || item.title || "",
       titleSvg: detail.titleSvg || "",
@@ -196,6 +200,15 @@
     return null;
   }
 
+  function slideHtml(slide, alt = "") {
+    if (Array.isArray(slide)) {
+      return `<div class="music-detail-strip" style="--strip-count: ${slide.length}">${slide
+        .map((src) => `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" />`)
+        .join("")}</div>`;
+    }
+    return `<img src="${escapeHtml(slide || "")}" alt="${escapeHtml(alt)}" />`;
+  }
+
   function renderArchiveDetail(item, kind) {
     const view = getDetailView(kind);
     if (!view.panel || !item) return;
@@ -213,10 +226,10 @@
       data.images.length > 1
         ? data.images
             .map(
-              (src, index) =>
+              (slide, index) =>
                 `<li>
                   <button type="button" class="music-detail-thumb${index === 0 ? " is-active" : ""}" data-photo-index="${index}" aria-label="Photo ${index + 1}">
-                    <img src="${escapeHtml(src)}" alt="" />
+                    ${slideHtml(slide)}
                   </button>
                 </li>`
             )
@@ -230,7 +243,7 @@
       </div>
       <div class="music-detail-media">
         <div class="music-detail-photo">
-          <img src="${escapeHtml(data.images[0] || "")}" alt="${escapeHtml(data.title)}" />
+          ${slideHtml(data.images[0], data.title)}
           ${
             data.images.length > 1
               ? `<div class="music-detail-navs">
@@ -332,7 +345,12 @@
     lastMusicCard = card;
     const source = card.querySelector(".archive-card-photo img") || card;
     const sr = source.getBoundingClientRect();
-    const srcUrl = source.currentSrc || source.src || archiveDetailFrom(item, kind).images[0] || "";
+    const firstSlide = archiveDetailFrom(item, kind).images[0];
+    const srcUrl =
+      source.currentSrc ||
+      source.src ||
+      (Array.isArray(firstSlide) ? firstSlide[0] : firstSlide) ||
+      "";
 
     renderArchiveDetail(item, kind);
     view.panel.hidden = false;
@@ -343,7 +361,7 @@
     card.classList.add("is-opening");
 
     const dest = view.panel.querySelector(".music-detail-photo");
-    const destImg = dest?.querySelector("img");
+    const destImg = dest?.querySelector(":scope > img");
     if (destImg && srcUrl) destImg.src = srcUrl;
     const navs = dest?.querySelector(".music-detail-navs");
     const startFly = () => {
@@ -389,8 +407,10 @@
     if (!images.length) return;
     const next = (index + images.length) % images.length;
     view.panel.dataset.photo = String(next);
-    const photo = view.panel.querySelector(".music-detail-photo > img");
-    if (photo) photo.src = images[next];
+    const current = view.panel.querySelector(
+      ".music-detail-photo > img, .music-detail-photo > .music-detail-strip"
+    );
+    if (current) current.outerHTML = slideHtml(images[next], archiveDetailFrom(item, kind).title);
     view.panel.querySelectorAll(".music-detail-thumb").forEach((el, i) => {
       el.classList.toggle("is-active", i === next);
     });
@@ -448,7 +468,7 @@
     document.body.classList.remove(view.bodyClass);
 
     const dest = view.panel.querySelector(".music-detail-photo");
-    const destImg = dest?.querySelector("img");
+    const destImg = dest?.querySelector(":scope > img");
     const cardImg =
       card.querySelector(".archive-card-photo img") ||
       card.querySelector(".archive-card-photo") ||
