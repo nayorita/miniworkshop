@@ -2,7 +2,6 @@ const archiveItems = [
   {
     id: "west-europe-2025",
     title: "WEST EUROPE",
-    duration: "11days",
     date: "2025.12.15 ~ 12.25",
     location: "ROME-FIRENZE-GRINDELWALD-PARIS",
     tags: ["ROME", "FIRENZE", "GRINDELWALD", "PARIS"],
@@ -12,7 +11,6 @@ const archiveItems = [
   {
     id: "mexico-peru-2025",
     title: "MEXICO-PERU",
-    duration: "15days",
     date: "2025.03.21 ~ 04.05",
     location: "CANCUN-CUSCO-MEXICOCITY",
     tags: ["CANCÚN", "CUSCO", "MEXICO CITY"],
@@ -22,7 +20,6 @@ const archiveItems = [
   {
     id: "france-suisse-2024",
     title: "FRANCE-SUISSE",
-    duration: "14days",
     date: "2024.07.24 ~ 08.06",
     location: "CHAMONIX-LAUSANNE-ZERMATT-GRINDELWALD-LUCERNE-BASEL",
     tags: ["Chamonix", "Lausanne", "Zermatt", "Grindelwald", "Lucerne", "Basel"],
@@ -32,7 +29,6 @@ const archiveItems = [
   {
     id: "german-norway-danmark-2023",
     title: "NORDIC",
-    duration: "16days",
     date: "2023.08.23 ~ 09.07",
     location: "FRANKFURT-HEIDELBERG-NUREMBERG-STRASBOURG-BERGEN-STAVANGER-COPENHAGEN",
     tags: ["Frankfurt", "Heidelberg", "Nuremberg", "Strasbourg", "Bergen", "Stavanger", "Copenhagen"],
@@ -42,7 +38,6 @@ const archiveItems = [
   {
     id: "italia-2022",
     title: "ITALIA",
-    duration: "14days",
     date: "2022.09.22 ~ 10.05",
     location: "MILANO-BOLZANO-CORTINA-FIRENZE-TOSCANA-ROME",
     tags: ["Milano", "Bolzano", "Cortina d'Ampezzo", "Firenze", "Toscana", "Rome"],

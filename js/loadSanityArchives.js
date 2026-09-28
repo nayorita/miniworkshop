@@ -34,7 +34,6 @@
     startDate,
     endDate,
     dateLabel,
-    duration,
     cities,
     cardDescription,
     order,
@@ -158,7 +157,6 @@
     return {
       id: doc.slug || doc._id,
       title: doc.title || "",
-      duration: doc.duration || "",
       date,
       location: route,
       tags,
